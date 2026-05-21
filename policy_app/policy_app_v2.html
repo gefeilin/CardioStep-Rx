@@ -581,6 +581,178 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       line-height: 1.35;
     }
 
+    .track-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .track-note {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .track-score {
+      display: grid;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(0, 131, 172, 0.08);
+    }
+
+    .score-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .score-value {
+      min-width: 64px;
+      color: var(--accent);
+      font-size: 34px;
+      line-height: 1;
+      font-weight: 800;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .score-label {
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .score-copy {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    .score-bar {
+      height: 8px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: rgba(0, 131, 172, 0.14);
+    }
+
+    .score-bar span {
+      display: block;
+      width: 0;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--accent);
+      transition: width 180ms ease;
+    }
+
+    .tracker-form {
+      display: grid;
+      gap: 10px;
+    }
+
+    .tracker-form-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .tracker-form label {
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 700;
+      line-height: 1.2;
+    }
+
+    .tracker-form input {
+      width: 100%;
+      min-height: 42px;
+      margin-top: 6px;
+      border: 1px solid #bfd6e6;
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      padding: 8px 10px;
+      font: inherit;
+      font-size: 16px;
+      font-weight: 650;
+    }
+
+    .tracker-actions {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+    }
+
+    .text-button {
+      min-height: 42px;
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 750;
+      padding: 0 8px;
+    }
+
+    .track-stat-grid,
+    .goal-progress-list {
+      display: grid;
+      gap: 10px;
+    }
+
+    .track-stat-grid {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+
+    .track-stat,
+    .goal-row {
+      border-radius: 8px;
+      background: var(--bg);
+      padding: 10px;
+    }
+
+    .track-stat .stat-label,
+    .goal-row .goal-label {
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+
+    .track-stat .stat-value,
+    .goal-row .goal-value {
+      margin-top: 5px;
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.08;
+      font-weight: 800;
+    }
+
+    .goal-row {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .goal-row .goal-detail {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.35;
+    }
+
+    .goal-badge {
+      min-width: 58px;
+      border-radius: 999px;
+      background: rgba(0, 131, 172, 0.10);
+      color: var(--accent);
+      padding: 7px 9px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
     @media (min-width: 640px) {
       .walking-plan-list {
         grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -994,6 +1166,11 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
+      .track-stat-grid,
+      .tracker-form-row {
+        grid-template-columns: 1fr;
+      }
+
       #plots {
         height: 292px;
         min-height: 292px;
@@ -1006,7 +1183,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         bottom: 0;
         z-index: 18;
         display: grid;
-        grid-template-columns: repeat(4, minmax(0, 1fr));
+        grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 4px;
         padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
         border-top: 1px solid rgba(148, 163, 184, 0.26);
@@ -1366,6 +1543,99 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         </div>
       </section>
 
+      <section class="track-panel card" aria-label="Manual 90-day tracker" data-tab-panel="track">
+        <div class="panel-title-row">
+          <div>
+            <h2>Manual 90-day tracker</h2>
+            <p class="track-note">Enter daily steps manually. This preview is saved in this browser and is not connected to Apple Health.</p>
+          </div>
+          <button class="help-button" type="button" data-help="manualTracker" aria-label="What does manual tracker mean?">
+            <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
+          </button>
+        </div>
+
+        <div class="track-score">
+          <div class="score-row">
+            <div>
+              <div class="score-label">Plan match score</div>
+              <div class="score-copy" id="track-score-copy">Add at least 7 days of steps to estimate a score.</div>
+            </div>
+            <div class="score-value" id="track-score">--</div>
+          </div>
+          <div class="score-bar" aria-hidden="true"><span id="track-score-bar"></span></div>
+        </div>
+
+        <form class="tracker-form" id="manual-track-form">
+          <div class="tracker-form-row">
+            <label>
+              Cycle start date
+              <input id="cycle-start-date" type="date">
+            </label>
+            <label>
+              Entry date
+              <input id="track-entry-date" type="date">
+            </label>
+            <label>
+              Daily steps
+              <input id="today-step-entry" type="number" min="0" step="1" inputmode="numeric" placeholder="Enter steps">
+            </label>
+          </div>
+          <div class="tracker-actions">
+            <button class="primary-button" type="submit">
+              <span class="button-content">
+                <svg class="sf-symbol button-icon" aria-hidden="true"><use href="#icon-waveform"></use></svg>
+                <span>Save entry</span>
+              </span>
+            </button>
+            <button class="text-button" type="button" id="clear-track-data">Clear</button>
+          </div>
+        </form>
+
+        <div class="track-stat-grid">
+          <div class="track-stat">
+            <div class="stat-label">Current cycle</div>
+            <div class="stat-value" id="track-cycle-day">Day --</div>
+          </div>
+          <div class="track-stat">
+            <div class="stat-label">Average so far</div>
+            <div class="stat-value" id="track-average">--</div>
+          </div>
+          <div class="track-stat">
+            <div class="stat-label">Needed from here</div>
+            <div class="stat-value" id="track-needed">--</div>
+          </div>
+        </div>
+
+        <div class="goal-progress-list" aria-label="Day-count goals">
+          <div class="goal-row">
+            <div>
+              <div class="goal-label">Usual-days goal</div>
+              <div class="goal-value" id="track-usual-count">-- / 60</div>
+              <div class="goal-detail" id="track-usual-detail">Days at or above the usual-days threshold.</div>
+            </div>
+            <div class="goal-badge" id="track-usual-badge">--</div>
+          </div>
+
+          <div class="goal-row">
+            <div>
+              <div class="goal-label">Middle-days goal</div>
+              <div class="goal-value" id="track-middle-count">-- / 45</div>
+              <div class="goal-detail" id="track-middle-detail">Days at or above the median threshold.</div>
+            </div>
+            <div class="goal-badge" id="track-middle-badge">--</div>
+          </div>
+
+          <div class="goal-row">
+            <div>
+              <div class="goal-label">Active-days goal</div>
+              <div class="goal-value" id="track-active-count">-- / 30</div>
+              <div class="goal-detail" id="track-active-detail">Days at or above the more-active-days threshold.</div>
+            </div>
+            <div class="goal-badge" id="track-active-badge">--</div>
+          </div>
+        </div>
+      </section>
+
       <section class="chart-panel card" data-tab-panel="chart">
         <div class="chart-heading">
           <div>
@@ -1453,6 +1723,10 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     <button class="mobile-tab" type="button" data-mobile-tab="chart">
       <svg class="sf-symbol" aria-hidden="true"><use href="#icon-chart-axis"></use></svg>
       <span>Chart</span>
+    </button>
+    <button class="mobile-tab" type="button" data-mobile-tab="track">
+      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+      <span>Track</span>
     </button>
     <button class="mobile-tab" type="button" data-mobile-tab="insight">
       <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
@@ -2136,6 +2410,10 @@ const HELP_TOPICS = {
     title: "Primary step goal",
     message: "The main daily step goal comes from the most concentrated point of the recommended 90-day distribution. It is not a strict daily minimum.",
   },
+  manualTracker: {
+    title: "Manual tracker",
+    message: "This preview uses manually entered steps to estimate progress during the current 90-day cycle. It does not read Apple Health data.",
+  },
   glucoseImputed: {
     title: "Glucose imputed",
     message: "Glucose was left blank, so the app estimated it from BMI, blood pressure, age, and sex for this research calculation.",
@@ -2160,6 +2438,7 @@ const HELP_TOPICS = {
 
 let chartMode = "density";
 let currentViewModel = null;
+const TRACK_STORAGE_KEY = "cardioStepRxManualTrackV2";
 
 function setText(id, text) {
   const element = document.getElementById(id);
@@ -2390,6 +2669,155 @@ function updateWalkingPlan(ctx) {
   setText("plan-average", `Aim for an average of around ${ctx.meanRounded} steps per day across 90 days.`);
 }
 
+function localDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function parseLocalDate(value) {
+  const [year, month, day] = String(value || "").split("-").map(Number);
+  if (!year || !month || !day) return new Date();
+  return new Date(year, month - 1, day);
+}
+
+function dateKeyOffset(dateKey, startKey) {
+  const date = parseLocalDate(dateKey);
+  const start = parseLocalDate(startKey);
+  return Math.floor((date - start) / 86400000);
+}
+
+function loadTrackState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(TRACK_STORAGE_KEY) || "{}");
+    return {
+      cycleStart: saved.cycleStart || localDateString(),
+      entries: saved.entries && typeof saved.entries === "object" ? saved.entries : {},
+    };
+  } catch {
+    return {cycleStart: localDateString(), entries: {}};
+  }
+}
+
+function saveTrackState(state) {
+  localStorage.setItem(TRACK_STORAGE_KEY, JSON.stringify(state));
+}
+
+function actualQuantile(values, level) {
+  if (!values.length) return 0;
+  const sorted = [...values].sort((a, b) => a - b);
+  const position = level * (sorted.length - 1);
+  const left = Math.floor(position);
+  const right = Math.ceil(position);
+  if (left === right) return sorted[left];
+  const weight = position - left;
+  return sorted[left] * (1 - weight) + sorted[right] * weight;
+}
+
+function trackStatusLabel(ratio) {
+  if (!Number.isFinite(ratio)) return "--";
+  if (ratio >= 1) return "On track";
+  if (ratio >= 0.8) return "Close";
+  return "Behind";
+}
+
+function countDaysAtOrAbove(values, threshold) {
+  return values.filter((value) => value >= threshold).length;
+}
+
+function updateTrackPanel(ctx) {
+  if (!ctx) return;
+
+  const state = loadTrackState();
+  const todayKey = localDateString();
+  const startKey = state.cycleStart || todayKey;
+  const currentDay = clamp(dateKeyOffset(todayKey, startKey) + 1, 1, 90);
+  const entries = Object.entries(state.entries)
+    .filter(([dateKey, steps]) => {
+      const offset = dateKeyOffset(dateKey, startKey);
+      return offset >= 0 && offset < 90 && Number.isFinite(Number(steps));
+    })
+    .sort(([a], [b]) => a.localeCompare(b));
+  const stepValues = entries.map(([, steps]) => Number(steps));
+  const loggedDays = stepValues.length;
+  const totalSteps = stepValues.reduce((sum, value) => sum + value, 0);
+  const averageSoFar = loggedDays ? totalSteps / loggedDays : null;
+  const remainingDays = Math.max(90 - loggedDays, 0);
+  const neededFromHere = remainingDays > 0 && loggedDays > 0
+    ? Math.max(0, (ctx.meanSteps * 90 - totalSteps) / remainingDays)
+    : null;
+  const entryDateElement = document.getElementById("track-entry-date");
+  if (!entryDateElement.value) entryDateElement.value = todayKey;
+  const entryDateKey = entryDateElement.value || todayKey;
+  const hasEntryForDate = Object.prototype.hasOwnProperty.call(state.entries, entryDateKey);
+
+  document.getElementById("cycle-start-date").value = startKey;
+  document.getElementById("today-step-entry").value = hasEntryForDate ? String(state.entries[entryDateKey]) : "";
+  setText("track-cycle-day", `Day ${Math.round(currentDay)} of 90`);
+  setText("track-average", averageSoFar === null ? "--" : `${formatHundred(averageSoFar)}`);
+  setText("track-needed", neededFromHere === null ? "--" : `${formatHundred(neededFromHere)}`);
+
+  const thresholds = [
+    {
+      key: "usual",
+      targetDays: 60,
+      threshold: ctx.q33,
+      rounded: ctx.q33Rounded,
+    },
+    {
+      key: "middle",
+      targetDays: 45,
+      threshold: ctx.q50,
+      rounded: ctx.q50Rounded,
+    },
+    {
+      key: "active",
+      targetDays: 30,
+      threshold: ctx.q67,
+      rounded: ctx.q67Rounded,
+    },
+  ];
+
+  const goalScores = [];
+  thresholds.forEach((goal) => {
+    const count = countDaysAtOrAbove(stepValues, goal.threshold);
+    const expectedForLogged = Math.max(1, Math.round((loggedDays / 90) * goal.targetDays));
+    const ratio = loggedDays ? count / expectedForLogged : 0;
+    goalScores.push(Math.min(ratio, 1) * 100);
+    setText(`track-${goal.key}-count`, `${count} / ${goal.targetDays} days`);
+    setText(
+      `track-${goal.key}-detail`,
+      `At least ${goal.rounded} steps. Expected for entered days: ${loggedDays ? expectedForLogged : 0}.`
+    );
+    setText(`track-${goal.key}-badge`, loggedDays ? trackStatusLabel(ratio) : "--");
+  });
+
+  if (loggedDays < 7) {
+    setText("track-score", "--");
+    setText("track-score-copy", `Enter ${7 - loggedDays} more day${loggedDays === 6 ? "" : "s"} to estimate a plan match score.`);
+    document.getElementById("track-score-bar").style.width = "0%";
+    return;
+  }
+
+  const levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+  const recommendedQuantiles = interpolate(APP_DATA.supports.lqd, ctx.result.quantile, levels);
+  const meanAbsError = levels.reduce((sum, level, index) => {
+    return sum + Math.abs(actualQuantile(stepValues, level) - recommendedQuantiles[index]);
+  }, 0) / levels.length;
+  const distributionScore = Math.max(0, 100 - meanAbsError / 50);
+  const goalScore = goalScores.reduce((sum, value) => sum + value, 0) / goalScores.length;
+  const planScore = Math.round(0.7 * distributionScore + 0.3 * goalScore);
+  const score = clamp(planScore, 0, 100);
+  setText("track-score", `${score}`);
+  setText("track-score-copy", score >= 80
+    ? "Your entered steps are close to the recommended 90-day rhythm."
+    : score >= 60
+      ? "Your entered steps are partly aligned with the recommended 90-day rhythm."
+      : "Your entered steps are not yet close to the recommended 90-day rhythm.");
+  document.getElementById("track-score-bar").style.width = `${score}%`;
+}
+
 function updateSubgroup(ctx) {
   const source = ctx.result.glucoseImputed ? "Imputed" : "Measured";
   const rows = [
@@ -2457,6 +2885,7 @@ function renderResult(result) {
   };
 
   updateWalkingPlan(currentViewModel);
+  updateTrackPanel(currentViewModel);
   updateInsight(currentViewModel);
   updateSubgroup(currentViewModel);
   renderChart();
@@ -2507,7 +2936,7 @@ let activeMobileTab = "plan";
 let lastContentTab = "plan";
 const initialMobileTab = new URLSearchParams(window.location.search).get("tab");
 const shouldOpenInitialProfile = initialMobileTab === "profile";
-if (["plan", "chart", "insight"].includes(initialMobileTab)) {
+if (["plan", "track", "chart", "insight"].includes(initialMobileTab)) {
   activeMobileTab = initialMobileTab;
   lastContentTab = initialMobileTab;
 }
@@ -2670,6 +3099,39 @@ document.getElementById("policy-form").addEventListener("submit", (event) => {
 
 document.getElementById("reset").addEventListener("click", () => {
   if (resetExample()) closeProfilePanel();
+});
+
+document.getElementById("manual-track-form").addEventListener("submit", (event) => {
+  event.preventDefault();
+  const state = loadTrackState();
+  const cycleStart = document.getElementById("cycle-start-date").value || localDateString();
+  const entryDateKey = document.getElementById("track-entry-date").value || localDateString();
+  const steps = Number(document.getElementById("today-step-entry").value);
+  if (!Number.isFinite(steps) || steps < 0) {
+    showHelp("manualTracker");
+    return;
+  }
+  state.cycleStart = cycleStart;
+  state.entries[entryDateKey] = Math.round(steps);
+  saveTrackState(state);
+  updateTrackPanel(currentViewModel);
+});
+
+document.getElementById("cycle-start-date").addEventListener("change", () => {
+  const state = loadTrackState();
+  state.cycleStart = document.getElementById("cycle-start-date").value || localDateString();
+  saveTrackState(state);
+  updateTrackPanel(currentViewModel);
+});
+
+document.getElementById("track-entry-date").addEventListener("change", () => {
+  updateTrackPanel(currentViewModel);
+});
+
+document.getElementById("clear-track-data").addEventListener("click", () => {
+  const state = {cycleStart: document.getElementById("cycle-start-date").value || localDateString(), entries: {}};
+  saveTrackState(state);
+  updateTrackPanel(currentViewModel);
 });
 
 document.querySelectorAll("input[name='sex-choice']").forEach((input) => {
