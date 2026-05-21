@@ -27,7 +27,7 @@ struct PolicyDashboardView: View {
         do {
             _result = State(initialValue: try engine.evaluate(profile: initialForm.validatedProfile()))
         } catch {
-            let fallback = PatientProfile(glucose: nil, bmi: 29.21, dbp: 74.59, sbp: 123.87, age: 55.46, sex: .female)
+            let fallback = PatientProfile(glucose: 100, bmi: 24, dbp: 70, sbp: 115, age: 50, sex: .female)
             _result = State(initialValue: try! engine.evaluate(profile: fallback))
         }
     }
@@ -84,6 +84,7 @@ struct PolicyDashboardView: View {
         VStack(alignment: .leading, spacing: 12) {
             header(isWide: isWide)
             SummaryGrid(result: result)
+            WalkingPlanPanel(result: result)
             ChartPanel(
                 engine: engine,
                 result: result,
@@ -354,6 +355,8 @@ private enum HelpTopic: String, Identifiable {
     case mostFrequentLevel
     case lowActivityDay
     case highActivityDay
+    case walkingPlan
+    case primaryStepGoal
     case glucoseImputed
     case glucoseMeasured
     case densityFunction
@@ -372,6 +375,10 @@ private enum HelpTopic: String, Identifiable {
             return "Low-activity day"
         case .highActivityDay:
             return "High-activity day"
+        case .walkingPlan:
+            return "90-day walking plan"
+        case .primaryStepGoal:
+            return "Primary step goal"
         case .glucoseImputed:
             return "Glucose imputed"
         case .glucoseMeasured:
@@ -395,6 +402,10 @@ private enum HelpTopic: String, Identifiable {
             return "A lower-activity day in the flexible 90-day plan. It is based on the lower third of the recommended daily-step distribution."
         case .highActivityDay:
             return "A higher-activity day threshold in the flexible 90-day plan. It is based on the upper third of the recommended daily-step distribution."
+        case .walkingPlan:
+            return "A flexible translation of the model curves into step goals for about 60, 45, and 30 days across the next 90 days."
+        case .primaryStepGoal:
+            return "The main daily step goal comes from the most concentrated point of the recommended 90-day distribution. It is not a strict daily minimum."
         case .glucoseImputed:
             return "Glucose was left blank, so the app estimated it from BMI, blood pressure, age, and sex for this research calculation."
         case .glucoseMeasured:
@@ -571,6 +582,117 @@ private struct CompactMetricChip: View {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .stroke(AppTheme.line)
         )
+    }
+}
+
+private struct WalkingPlanPanel: View {
+    let result: PolicyResult
+    @State private var activeHelp: HelpTopic?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Your 90-day walking plan")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(AppTheme.ink)
+                    Text("Use the primary step goal as your everyday anchor, while allowing easier and more active days across the 90 days.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                HelpButton(color: AppTheme.green) {
+                    activeHelp = .walkingPlan
+                }
+            }
+
+            VStack(spacing: 10) {
+                WalkingPlanRow(
+                    title: "Primary step goal",
+                    detail: "Aim for around \(result.primaryStepRounded) steps as your primary daily step goal.",
+                    systemImage: "target",
+                    isPrimary: true,
+                    helpTopic: .primaryStepGoal,
+                    activeHelp: $activeHelp
+                )
+                WalkingPlanRow(
+                    title: "Usual days",
+                    detail: "On about 60 days, aim for at least \(result.q33Rounded) steps.",
+                    systemImage: "calendar",
+                    activeHelp: $activeHelp
+                )
+                WalkingPlanRow(
+                    title: "Middle days",
+                    detail: "On about 45 days, aim for at least \(result.q50Rounded) steps.",
+                    systemImage: "chart.line.uptrend.xyaxis",
+                    activeHelp: $activeHelp
+                )
+                WalkingPlanRow(
+                    title: "More active days",
+                    detail: "On about 30 days, aim for at least \(result.q67Rounded) steps.",
+                    systemImage: "figure.walk",
+                    activeHelp: $activeHelp
+                )
+                WalkingPlanRow(
+                    title: "Average rhythm",
+                    detail: "Aim for an average of around \(result.meanRounded) steps per day across 90 days.",
+                    systemImage: "waveform.path.ecg",
+                    activeHelp: $activeHelp
+                )
+            }
+        }
+        .cardStyle()
+        .accessibilityIdentifier("walkingPlan")
+        .alert(item: $activeHelp) { topic in
+            Alert(
+                title: Text(topic.title),
+                message: Text(topic.message),
+                dismissButton: .default(Text("Got it"))
+            )
+        }
+    }
+}
+
+private struct WalkingPlanRow: View {
+    let title: String
+    let detail: String
+    let systemImage: String
+    var isPrimary = false
+    var helpTopic: HelpTopic? = nil
+    @Binding var activeHelp: HelpTopic?
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            Image(systemName: systemImage)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(isPrimary ? .white : AppTheme.green)
+                .frame(width: 28, height: 28)
+                .background(isPrimary ? AppTheme.green : AppTheme.green.opacity(0.10))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 3) {
+                HStack(spacing: 5) {
+                    Text(title)
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.ink)
+                    if let helpTopic {
+                        HelpButton(color: AppTheme.green) {
+                            activeHelp = helpTopic
+                        }
+                    }
+                }
+
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(10)
+        .background(isPrimary ? AppTheme.green.opacity(0.08) : AppTheme.background)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }
 
@@ -1147,7 +1269,7 @@ private struct InsightPanel: View {
                         Text("Insight")
                             .font(.headline.weight(.bold))
                             .foregroundStyle(AppTheme.ink)
-                        Text("90-day target: \(result.meanRounded) average steps/day. Most frequent level: \(result.peakCardText).")
+                        Text("The plan translates the density and quantile curves into flexible 90-day step goals.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.leading)
@@ -1164,18 +1286,18 @@ private struct InsightPanel: View {
                 VStack(alignment: .leading, spacing: 10) {
                     InsightItem(
                         icon: "target",
-                        title: "Main target",
-                        detail: "Average about \(result.meanRounded) steps per day across the next 90 days."
+                        title: "Primary step goal",
+                        detail: "The primary goal comes from the strongest point of the density curve, not from a one-day maximum."
                     )
                     InsightItem(
                         icon: "chart.xyaxis.line",
-                        title: "Typical high-frequency day",
-                        detail: "More days should cluster near \(result.peakCardText) steps. This is the distribution peak, not a one-day maximum."
+                        title: "Day-count goals",
+                        detail: "The 60-, 45-, and 30-day goals come from the 33rd, 50th, and 67th percentiles of the recommended 90-day distribution."
                     )
                     InsightItem(
                         icon: "slider.horizontal.3",
                         title: "Flexible range",
-                        detail: "Lower-activity days can be around \(result.q33Rounded) steps, while higher-activity days can reach \(result.q67Rounded) steps or more."
+                        detail: "The days do not need to look identical; the recommendation is about the overall 90-day rhythm."
                     )
                 }
             }

@@ -80,11 +80,14 @@ struct PolicyResult {
     let meanSteps: Double
     let meanDensity: Double
     let q33: Double
+    let q50: Double
     let q67: Double
 
     let meanRounded: String
+    let primaryStepRounded: String
     let peakCardText: String
     let q33Rounded: String
+    let q50Rounded: String
     let q67Rounded: String
     let interpretationSummary: String
     let interpretation: String
@@ -233,9 +236,12 @@ struct PolicyEngine {
         let quantileRows = selectedQuantiles(quantile)
         let q33 = quantileRows[0].value
         let q67 = quantileRows[1].value
+        let q50 = interpolate(x: data.supports.lqd, y: quantile, xNew: [0.5])[0]
         let meanRounded = formatHundred(meanSteps)
+        let primaryStepRounded = formatHundred(peaks.max(by: { $0.density < $1.density })?.step ?? meanSteps)
         let peakCardText = peaks.map { "≈ \(formatHundred($0.step))" }.joined(separator: ", ")
         let q33Rounded = formatHundred(q33)
+        let q50Rounded = formatHundred(q50)
         let q67Rounded = formatHundred(q67)
         let peakSummary = formatStepList(peaks.map(\.step))
         let peakPhrase = peaks.count == 1
@@ -268,10 +274,13 @@ struct PolicyEngine {
             meanSteps: meanSteps,
             meanDensity: meanDensity,
             q33: q33,
+            q50: q50,
             q67: q67,
             meanRounded: meanRounded,
+            primaryStepRounded: primaryStepRounded,
             peakCardText: peakCardText,
             q33Rounded: q33Rounded,
+            q50Rounded: q50Rounded,
             q67Rounded: q67Rounded,
             interpretationSummary: interpretationSummary,
             interpretation: interpretation
