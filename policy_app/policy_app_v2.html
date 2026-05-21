@@ -3267,6 +3267,13 @@ document.getElementById("track-entry-date").addEventListener("change", () => {
 });
 
 document.getElementById("clear-track-data").addEventListener("click", () => {
+  const stateBeforeClear = loadTrackState();
+  if (!Object.keys(stateBeforeClear.entries).length) {
+    window.alert("There are no manual step records to clear.");
+    return;
+  }
+  const confirmation = window.prompt("This will permanently clear all manual step records saved in this browser.\n\nType yes to clear records.");
+  if ((confirmation || "").trim().toLowerCase() !== "yes") return;
   const state = {cycleStart: clampDateKeyToToday(document.getElementById("cycle-start-date").value), entries: {}};
   saveTrackState(state);
   updateTrackPanel(currentViewModel);
