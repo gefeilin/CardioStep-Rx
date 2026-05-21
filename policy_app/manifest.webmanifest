@@ -1,0 +1,24 @@
+{
+  "name": "CardioStep Rx",
+  "short_name": "CardioStep Rx",
+  "description": "Precision physical activity prescription for cardiometabolic risk.",
+  "start_url": "./policy_app.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f1f9fd",
+  "theme_color": "#0083ac",
+  "icons": [
+    {
+      "src": "web-app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "web-app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
