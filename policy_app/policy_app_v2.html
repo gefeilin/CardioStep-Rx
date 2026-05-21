@@ -719,9 +719,9 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       min-width: 0;
     }
 
-    .tracker-form-row {
+    .tracker-date-row {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
       min-width: 0;
     }
@@ -748,6 +748,14 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       font: inherit;
       font-size: 16px;
       font-weight: 650;
+    }
+
+    .tracker-form input[type="date"] {
+      padding-inline: 7px;
+      font-size: 14px;
+      text-align: center;
+      -webkit-appearance: none;
+      appearance: none;
     }
 
     .tracker-actions {
@@ -1238,8 +1246,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         grid-template-columns: repeat(3, minmax(0, 1fr));
       }
 
-      .track-stat-grid,
-      .tracker-form-row {
+      .track-stat-grid {
         grid-template-columns: 1fr;
       }
 
@@ -1650,7 +1657,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         </div>
 
         <form class="tracker-form" id="manual-track-form">
-          <div class="tracker-form-row">
+          <div class="tracker-date-row">
             <label>
               Cycle start date
               <input id="cycle-start-date" type="date">
@@ -1659,6 +1666,8 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
               Entry date
               <input id="track-entry-date" type="date">
             </label>
+          </div>
+          <div>
             <label>
               Daily steps
               <input id="today-step-entry" type="number" min="0" step="1" inputmode="numeric" placeholder="Enter steps">
