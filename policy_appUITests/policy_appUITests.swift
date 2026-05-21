@@ -23,14 +23,25 @@ final class policy_appUITests: XCTestCase {
     }
 
     @MainActor
-    func testExample() throws {
-        // UI tests must launch the application that they test.
+    func testNativeDashboardLaunchesAndProfileSheetWorks() throws {
         let app = XCUIApplication()
         app.launch()
 
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
-        // XCUIAutomation Documentation
-        // https://developer.apple.com/documentation/xcuiautomation
+        XCTAssertTrue(app.staticTexts["Precision Physical Activity Prescription"].waitForExistence(timeout: 8))
+        XCTAssertTrue(app.staticTexts["90-day average"].exists)
+        XCTAssertTrue(app.buttons["Edit Profile"].exists)
+
+        app.buttons["Edit Profile"].tap()
+        XCTAssertTrue(app.navigationBars["Edit Profile"].waitForExistence(timeout: 3))
+        XCTAssertTrue(app.buttons["Generate"].exists)
+
+        app.buttons["Generate"].tap()
+        XCTAssertTrue(app.staticTexts["Precision Physical Activity Prescription"].waitForExistence(timeout: 3))
+
+        let quantileButton = app.segmentedControls.buttons["Quantile"]
+        XCTAssertTrue(quantileButton.waitForExistence(timeout: 3))
+        quantileButton.tap()
+        XCTAssertTrue(app.staticTexts["Quantile function of daily steps"].waitForExistence(timeout: 3))
     }
 
     @MainActor
