@@ -15,7 +15,7 @@ struct PolicyDashboardView: View {
     @State private var result: PolicyResult
     @State private var chartMode: PolicyChartMode = .density
     @State private var isShowingProfileEditor = false
-    @State private var profileEditorDetent: PresentationDetent = .height(430)
+    @State private var profileEditorDetent: PresentationDetent = .height(470)
     @State private var isInsightExpanded = false
     @State private var selectedDensityStep: Double?
     @State private var selectedQuantileLevel: Double?
@@ -74,7 +74,7 @@ struct PolicyDashboardView: View {
                         }
                     }
                 }
-                .presentationDetents([.height(430), .large], selection: $profileEditorDetent)
+                .presentationDetents([.height(470), .large], selection: $profileEditorDetent)
                 .presentationDragIndicator(.visible)
             }
         }
@@ -123,7 +123,7 @@ struct PolicyDashboardView: View {
             Spacer(minLength: 8)
             if !isWide {
                 Button {
-                    profileEditorDetent = .height(430)
+                    profileEditorDetent = .height(470)
                     isShowingProfileEditor = true
                 } label: {
                     Image(systemName: "slider.horizontal.3")

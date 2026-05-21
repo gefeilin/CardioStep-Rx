@@ -595,6 +595,13 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       border-radius: 8px;
       overflow: hidden;
       background: #fff;
+      touch-action: pan-y;
+    }
+
+    #plots .draglayer,
+    #plots .nsewdrag,
+    #plots .zoomlayer {
+      touch-action: pan-y !important;
     }
 
     .insight-toggle {
@@ -777,8 +784,8 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         right: 12px;
         bottom: max(14px, env(safe-area-inset-bottom));
         z-index: 30;
-        max-height: min(54vh, 430px);
-        max-height: min(54dvh, 430px);
+        max-height: min(60vh, 480px);
+        max-height: min(60dvh, 480px);
         overflow: auto;
         padding: 14px 16px 16px;
         border-bottom: 1px solid var(--line);
@@ -1980,7 +1987,16 @@ function renderChart() {
     plot_bgcolor: "#ffffff",
     showlegend: false,
     hovermode: "closest",
+    dragmode: false,
     font: {family: "-apple-system, BlinkMacSystemFont, SF Pro Text, SF Pro Display, Helvetica Neue, Arial, sans-serif", color: THEME.ink},
+  };
+
+  const plotConfig = {
+    responsive: true,
+    displayModeBar: false,
+    scrollZoom: false,
+    doubleClick: false,
+    showTips: false,
   };
 
   if (chartMode === "density") {
@@ -2027,6 +2043,7 @@ function renderChart() {
       xaxis: {
         title: "Daily steps (100-22.3k)",
         range: [100, 22300],
+        fixedrange: true,
         tickmode: "array",
         tickvals: [100, 5000, 10000, 15000, 22300],
         ticktext: ["100", "5k", "10k", "15k", "22.3k"],
@@ -2036,16 +2053,13 @@ function renderChart() {
       yaxis: {
         title: "Density",
         range: [0, densityYMax],
+        fixedrange: true,
         side: "right",
         gridcolor: THEME.grid,
         zeroline: false,
         nticks: 3,
       },
-    }, {
-      responsive: true,
-      displayModeBar: false,
-      scrollZoom: false,
-    });
+    }, plotConfig);
   } else {
     const qMax = quantileYMax(ctx.result.quantile, ctx.reference.quantile);
     const traces = [
@@ -2090,6 +2104,7 @@ function renderChart() {
       xaxis: {
         title: "Quantile level",
         range: [0, 1],
+        fixedrange: true,
         tickmode: "array",
         tickvals: [0, 0.33, 0.67, 1],
         ticktext: ["0", "0.33", "0.67", "1"],
@@ -2099,14 +2114,11 @@ function renderChart() {
       yaxis: {
         title: "Daily steps",
         range: [0, qMax],
+        fixedrange: true,
         gridcolor: THEME.grid,
         zeroline: false,
       },
-    }, {
-      responsive: true,
-      displayModeBar: false,
-      scrollZoom: false,
-    });
+    }, plotConfig);
   }
 }
 
