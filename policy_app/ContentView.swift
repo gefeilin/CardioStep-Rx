@@ -29,7 +29,7 @@ struct ContentView: View {
                 }
                 .padding()
             } else {
-                ProgressView("Loading CardioStep Rx")
+                ProgressView("Loading CardioStepRx")
                     .task(loadEngine)
             }
         }

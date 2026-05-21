@@ -105,7 +105,7 @@ struct PolicyDashboardView: View {
     private func header(isWide: Bool) -> some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("CardioStep Rx")
+                Text("CardioStepRx")
                     .font(.caption.weight(.bold))
                     .foregroundStyle(AppTheme.green)
                     .lineLimit(1)

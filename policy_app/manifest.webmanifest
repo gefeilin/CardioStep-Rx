@@ -1,6 +1,6 @@
 {
-  "name": "CardioStep Rx",
-  "short_name": "CardioStep Rx",
+  "name": "CardioStepRx",
+  "short_name": "CardioStepRx",
   "description": "Precision physical activity prescription for cardiometabolic risk.",
   "start_url": "./policy_app.html",
   "scope": "./",
