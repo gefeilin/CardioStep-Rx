@@ -1558,7 +1558,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
           <div class="score-row">
             <div>
               <div class="score-label">Plan match score</div>
-              <div class="score-copy" id="track-score-copy">Add at least 7 days of steps to estimate a score.</div>
+              <div class="score-copy" id="track-score-copy">Add at least 30 days of steps before the 90-day score appears.</div>
             </div>
             <div class="score-value" id="track-score">--</div>
           </div>
@@ -2715,8 +2715,9 @@ function actualQuantile(values, level) {
   return sorted[left] * (1 - weight) + sorted[right] * weight;
 }
 
-function trackStatusLabel(ratio) {
+function trackStatusLabel(ratio, loggedDays) {
   if (!Number.isFinite(ratio)) return "--";
+  if (loggedDays > 0 && loggedDays < 7) return "Logging";
   if (ratio >= 1) return "On track";
   if (ratio >= 0.8) return "Close";
   return "Behind";
@@ -2790,13 +2791,17 @@ function updateTrackPanel(ctx) {
       `track-${goal.key}-detail`,
       `At least ${goal.rounded} steps. Expected for entered days: ${loggedDays ? expectedForLogged : 0}.`
     );
-    setText(`track-${goal.key}-badge`, loggedDays ? trackStatusLabel(ratio) : "--");
+    setText(`track-${goal.key}-badge`, loggedDays ? trackStatusLabel(ratio, loggedDays) : "--");
   });
 
-  if (loggedDays < 7) {
+  const minScoreDays = 30;
+  if (loggedDays < minScoreDays) {
+    const daysLeft = minScoreDays - loggedDays;
     setText("track-score", "--");
-    setText("track-score-copy", `Enter ${7 - loggedDays} more day${loggedDays === 6 ? "" : "s"} to estimate a plan match score.`);
-    document.getElementById("track-score-bar").style.width = "0%";
+    setText("track-score-copy", loggedDays === 0
+      ? "Start entering daily steps. The score waits until there is enough history to judge fairly."
+      : `${loggedDays} day${loggedDays === 1 ? "" : "s"} logged. Enter ${daysLeft} more day${daysLeft === 1 ? "" : "s"} before the score appears.`);
+    document.getElementById("track-score-bar").style.width = `${Math.round((loggedDays / minScoreDays) * 100)}%`;
     return;
   }
 
@@ -2807,14 +2812,19 @@ function updateTrackPanel(ctx) {
   }, 0) / levels.length;
   const distributionScore = Math.max(0, 100 - meanAbsError / 50);
   const goalScore = goalScores.reduce((sum, value) => sum + value, 0) / goalScores.length;
-  const planScore = Math.round(0.7 * distributionScore + 0.3 * goalScore);
+  const rawPlanScore = Math.round(0.7 * distributionScore + 0.3 * goalScore);
+  const confidence = clamp((loggedDays - minScoreDays) / 30, 0, 1);
+  const planScore = loggedDays < 60
+    ? Math.round((75 * (1 - confidence)) + (rawPlanScore * confidence))
+    : rawPlanScore;
   const score = clamp(planScore, 0, 100);
   setText("track-score", `${score}`);
+  const scorePrefix = loggedDays < 60 ? "Early estimate: " : "";
   setText("track-score-copy", score >= 80
-    ? "Your entered steps are close to the recommended 90-day rhythm."
+    ? `${scorePrefix}your entered steps are close to the recommended 90-day rhythm.`
     : score >= 60
-      ? "Your entered steps are partly aligned with the recommended 90-day rhythm."
-      : "Your entered steps are not yet close to the recommended 90-day rhythm.");
+      ? `${scorePrefix}your entered steps are partly aligned with the recommended 90-day rhythm.`
+      : `${scorePrefix}your entered steps are not yet close to the recommended 90-day rhythm.`);
   document.getElementById("track-score-bar").style.width = `${score}%`;
 }
 
