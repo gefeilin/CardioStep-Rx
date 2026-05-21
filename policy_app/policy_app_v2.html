@@ -595,7 +595,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 
     .track-score {
       display: grid;
-      gap: 10px;
+      gap: 12px;
       padding: 12px;
       border-radius: 8px;
       background: rgba(0, 131, 172, 0.08);
@@ -608,13 +608,30 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       gap: 12px;
     }
 
+    .score-value-group {
+      display: grid;
+      min-width: 74px;
+      justify-items: end;
+      gap: 4px;
+    }
+
     .score-value {
-      min-width: 64px;
       color: var(--accent);
       font-size: 34px;
       line-height: 1;
       font-weight: 800;
       text-align: right;
+      white-space: nowrap;
+    }
+
+    .score-stage {
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.78);
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
       white-space: nowrap;
     }
 
@@ -630,11 +647,28 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       line-height: 1.35;
     }
 
+    .score-meter {
+      position: relative;
+      display: grid;
+      gap: 8px;
+      padding-top: 7px;
+    }
+
     .score-bar {
       height: 8px;
       overflow: hidden;
       border-radius: 999px;
-      background: rgba(0, 131, 172, 0.14);
+      background: linear-gradient(
+        90deg,
+        rgba(0, 131, 172, 0.13) 0%,
+        rgba(0, 131, 172, 0.13) 25%,
+        rgba(0, 131, 172, 0.2) 25%,
+        rgba(0, 131, 172, 0.2) 50%,
+        rgba(0, 131, 172, 0.3) 50%,
+        rgba(0, 131, 172, 0.3) 75%,
+        rgba(0, 131, 172, 0.45) 75%,
+        rgba(0, 131, 172, 0.45) 100%
+      );
     }
 
     .score-bar span {
@@ -644,6 +678,39 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       border-radius: inherit;
       background: var(--accent);
       transition: width 180ms ease;
+    }
+
+    .score-marker {
+      position: absolute;
+      top: 2px;
+      left: 0%;
+      width: 16px;
+      height: 16px;
+      border: 3px solid var(--accent);
+      border-radius: 999px;
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(0, 72, 96, 0.22);
+      transform: translateX(-50%);
+      transition: left 180ms ease;
+    }
+
+    .score-scale {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 6px;
+      color: var(--muted);
+      font-size: 10px;
+      font-weight: 700;
+      line-height: 1.15;
+    }
+
+    .score-scale span:nth-child(4) {
+      text-align: right;
+    }
+
+    .score-scale span:nth-child(2),
+    .score-scale span:nth-child(3) {
+      text-align: center;
     }
 
     .tracker-form {
@@ -1557,12 +1624,24 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         <div class="track-score">
           <div class="score-row">
             <div>
-              <div class="score-label">Plan match score</div>
-              <div class="score-copy" id="track-score-copy">Add at least 30 days of steps before the 90-day score appears.</div>
+              <div class="score-label">Real-time plan score</div>
+              <div class="score-copy" id="track-score-copy">Updates as you enter steps. Early scores are softened until more days are logged.</div>
             </div>
-            <div class="score-value" id="track-score">--</div>
+            <div class="score-value-group">
+              <div class="score-value" id="track-score">--</div>
+              <div class="score-stage" id="track-score-stage">Collecting</div>
+            </div>
           </div>
-          <div class="score-bar" aria-hidden="true"><span id="track-score-bar"></span></div>
+          <div class="score-meter" aria-hidden="true">
+            <div class="score-marker" id="track-score-marker"></div>
+            <div class="score-bar"><span id="track-score-bar"></span></div>
+            <div class="score-scale">
+              <span>Collecting data</span>
+              <span>Building rhythm</span>
+              <span>Close to plan</span>
+              <span>Strong match</span>
+            </div>
+          </div>
         </div>
 
         <form class="tracker-form" id="manual-track-form">
@@ -2727,6 +2806,23 @@ function countDaysAtOrAbove(values, threshold) {
   return values.filter((value) => value >= threshold).length;
 }
 
+function updateScoreMeter(percent) {
+  const clipped = clamp(percent, 0, 100);
+  const bar = document.getElementById("track-score-bar");
+  const marker = document.getElementById("track-score-marker");
+  if (bar) bar.style.width = `${clipped}%`;
+  if (marker) marker.style.left = `${clamp(clipped, 4, 96)}%`;
+}
+
+function trackScoreStage(score, loggedDays) {
+  if (loggedDays === 0) return "Waiting";
+  if (loggedDays < 7) return "Starting";
+  if (loggedDays < 30) return "Early estimate";
+  if (score >= 80) return "Strong match";
+  if (score >= 60) return "Close";
+  return "Building";
+}
+
 function updateTrackPanel(ctx) {
   if (!ctx) return;
 
@@ -2794,38 +2890,40 @@ function updateTrackPanel(ctx) {
     setText(`track-${goal.key}-badge`, loggedDays ? trackStatusLabel(ratio, loggedDays) : "--");
   });
 
-  const minScoreDays = 30;
-  if (loggedDays < minScoreDays) {
-    const daysLeft = minScoreDays - loggedDays;
+  if (loggedDays === 0) {
     setText("track-score", "--");
-    setText("track-score-copy", loggedDays === 0
-      ? "Start entering daily steps. The score waits until there is enough history to judge fairly."
-      : `${loggedDays} day${loggedDays === 1 ? "" : "s"} logged. Enter ${daysLeft} more day${daysLeft === 1 ? "" : "s"} before the score appears.`);
-    document.getElementById("track-score-bar").style.width = `${Math.round((loggedDays / minScoreDays) * 100)}%`;
+    setText("track-score-stage", trackScoreStage(0, loggedDays));
+    setText("track-score-copy", "Enter today's steps to start the live score.");
+    updateScoreMeter(0);
     return;
   }
 
-  const levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-  const recommendedQuantiles = interpolate(APP_DATA.supports.lqd, ctx.result.quantile, levels);
-  const meanAbsError = levels.reduce((sum, level, index) => {
-    return sum + Math.abs(actualQuantile(stepValues, level) - recommendedQuantiles[index]);
-  }, 0) / levels.length;
-  const distributionScore = Math.max(0, 100 - meanAbsError / 50);
+  const averageScore = clamp(100 - (Math.abs(averageSoFar - ctx.meanSteps) / 80), 0, 100);
+  let distributionScore = averageScore;
+  if (loggedDays >= 7) {
+    const levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+    const recommendedQuantiles = interpolate(APP_DATA.supports.lqd, ctx.result.quantile, levels);
+    const meanAbsError = levels.reduce((sum, level, index) => {
+      return sum + Math.abs(actualQuantile(stepValues, level) - recommendedQuantiles[index]);
+    }, 0) / levels.length;
+    const quantileScore = Math.max(0, 100 - meanAbsError / 50);
+    const distributionWeight = clamp((loggedDays - 7) / 23, 0, 1);
+    distributionScore = (averageScore * (1 - distributionWeight)) + (quantileScore * distributionWeight);
+  }
   const goalScore = goalScores.reduce((sum, value) => sum + value, 0) / goalScores.length;
-  const rawPlanScore = Math.round(0.7 * distributionScore + 0.3 * goalScore);
-  const confidence = clamp((loggedDays - minScoreDays) / 30, 0, 1);
-  const planScore = loggedDays < 60
-    ? Math.round((75 * (1 - confidence)) + (rawPlanScore * confidence))
-    : rawPlanScore;
+  const rawPlanScore = Math.round(0.55 * distributionScore + 0.45 * goalScore);
+  const confidence = clamp(loggedDays / 30, 0, 1);
+  const planScore = Math.round((75 * (1 - confidence)) + (rawPlanScore * confidence));
   const score = clamp(planScore, 0, 100);
   setText("track-score", `${score}`);
-  const scorePrefix = loggedDays < 60 ? "Early estimate: " : "";
+  setText("track-score-stage", trackScoreStage(score, loggedDays));
+  const scorePrefix = loggedDays < 30 ? "Live early score: " : "Live score: ";
   setText("track-score-copy", score >= 80
     ? `${scorePrefix}your entered steps are close to the recommended 90-day rhythm.`
     : score >= 60
       ? `${scorePrefix}your entered steps are partly aligned with the recommended 90-day rhythm.`
-      : `${scorePrefix}your entered steps are not yet close to the recommended 90-day rhythm.`);
-  document.getElementById("track-score-bar").style.width = `${score}%`;
+      : `${scorePrefix}keep logging; the score becomes more reliable as more days are entered.`);
+  updateScoreMeter(score);
 }
 
 function updateSubgroup(ctx) {
