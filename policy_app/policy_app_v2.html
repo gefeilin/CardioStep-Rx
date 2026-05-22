@@ -2086,7 +2086,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         <div class="chart-heading">
           <div>
             <h2>Advanced details</h2>
-            <p id="chart-subtitle">Step pattern across the 90-day plan</p>
+            <p id="chart-subtitle">Density function of daily steps</p>
           </div>
           <button class="help-button" id="chart-help" type="button" data-help="densityFunction" aria-label="What does this chart mean?">
             <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
@@ -2094,8 +2094,8 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         </div>
 
         <div class="chart-mode" role="tablist" aria-label="Chart mode">
-          <button id="density-mode" class="active" type="button" data-chart-mode="density" role="tab" aria-selected="true">Step pattern</button>
-          <button id="quantile-mode" type="button" data-chart-mode="quantile" role="tab" aria-selected="false">Targets</button>
+          <button id="density-mode" class="active" type="button" data-chart-mode="density" role="tab" aria-selected="true">Density function</button>
+          <button id="quantile-mode" type="button" data-chart-mode="quantile" role="tab" aria-selected="false">Quantile function</button>
         </div>
 
         <div id="chart-legend" class="chart-legend" aria-label="Chart legend"></div>
@@ -2892,12 +2892,12 @@ const HELP_TOPICS = {
     message: "The glucose value entered in the profile and used by the recommendation model.",
   },
   densityFunction: {
-    title: "Step pattern",
+    title: "Density function",
     message: "This advanced curve shows which daily step levels appear more often in the recommended 90-day plan. Taller parts mean more days near that step level.",
   },
   quantileFunction: {
-    title: "Low-to-high targets",
-    message: "This advanced curve shows the daily step target from lower-activity days to more active days.",
+    title: "Quantile function",
+    message: "This advanced curve shows the recommended daily-step value across quantile levels from 0 to 1.",
   },
   subgroupAverage: {
     title: "Subgroup average",
@@ -2968,7 +2968,7 @@ function updateLegend() {
 
 function updateChartChrome() {
   const isDensity = chartMode === "density";
-  setText("chart-subtitle", isDensity ? "Step pattern across the 90-day plan" : "Low-to-high daily step targets");
+  setText("chart-subtitle", isDensity ? "Density function of daily steps" : "Quantile function of daily steps");
   document.getElementById("chart-help").dataset.help = isDensity ? "densityFunction" : "quantileFunction";
   document.querySelectorAll("[data-chart-mode]").forEach((button) => {
     const isActive = button.dataset.chartMode === chartMode;

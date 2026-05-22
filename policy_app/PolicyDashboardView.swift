@@ -2,8 +2,8 @@ import Charts
 import SwiftUI
 
 enum PolicyChartMode: String, CaseIterable, Identifiable {
-    case density = "Step pattern"
-    case quantile = "Targets"
+    case density = "Density function"
+    case quantile = "Quantile function"
 
     var id: String { rawValue }
 }
@@ -549,9 +549,9 @@ private enum HelpTopic: String, Identifiable {
         case .glucoseMeasured:
             return "Glucose"
         case .densityFunction:
-            return "Step pattern"
+            return "Density function"
         case .quantileFunction:
-            return "Low-to-high targets"
+            return "Quantile function"
         case .subgroupAverage:
             return "Similar profiles"
         case .healthTracker:
@@ -580,7 +580,7 @@ private enum HelpTopic: String, Identifiable {
         case .densityFunction:
             return "This advanced curve shows which daily step levels appear more often in the recommended 90-day plan. Taller parts mean more days near that step level."
         case .quantileFunction:
-            return "This advanced curve shows the daily step target from lower-activity days to more active days."
+            return "This advanced curve shows the recommended daily-step value across quantile levels from 0 to 1."
         case .subgroupAverage:
             return "The gray curve summarizes recommendations for profiles with similar glucose, age, BMI, blood pressure, sex, and glucose-source group."
         case .healthTracker:
@@ -1464,7 +1464,7 @@ private struct ChartPanel: View {
                         .lineLimit(2)
                         .minimumScaleFactor(0.82)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(mode == .density ? "Step pattern across the 90-day plan" : "Low-to-high daily step targets")
+                    Text(mode == .density ? "Density function of daily steps" : "Quantile function of daily steps")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -1543,11 +1543,11 @@ private struct ChartLegendRow: View {
     }
 
     private var redMarkerLabel: String {
-        mode == .density ? "Most common" : "Easy target"
+        mode == .density ? "Most common" : "Q0.33"
     }
 
     private var blueMarkerLabel: String {
-        mode == .density ? "90-day average" : "Active target"
+        mode == .density ? "90-day average" : "Q0.67"
     }
 }
 
@@ -1870,7 +1870,7 @@ private struct QuantileChart: View {
                 }
             }
         }
-        .chartXAxisLabel("Low-to-high days")
+        .chartXAxisLabel("Quantile level")
         .chartYAxisLabel("Daily steps")
         .chartOverlay { proxy in
             GeometryReader { geometry in
@@ -1912,7 +1912,7 @@ private struct QuantileChart: View {
                 id: "q33",
                 level: 0.33,
                 steps: result.q33,
-                label: "Easy target ≈ \(result.q33Rounded)",
+                label: "Q0.33 ≈ \(result.q33Rounded)",
                 color: AppTheme.red,
                 annotationPosition: .bottom
             ),
@@ -1920,7 +1920,7 @@ private struct QuantileChart: View {
                 id: "q67",
                 level: 0.67,
                 steps: result.q67,
-                label: "Active target ≈ \(result.q67Rounded)",
+                label: "Q0.67 ≈ \(result.q67Rounded)",
                 color: AppTheme.blue,
                 annotationPosition: .top
             )
