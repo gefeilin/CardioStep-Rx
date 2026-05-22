@@ -8,6 +8,31 @@ enum PolicyChartMode: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
+private enum MobileDashboardTab: String, CaseIterable, Identifiable {
+    case plan = "Plan"
+    case chart = "Chart"
+    case track = "Track"
+    case insight = "Insight"
+    case profile = "Profile"
+
+    var id: String { rawValue }
+
+    var systemImage: String {
+        switch self {
+        case .plan:
+            return "target"
+        case .chart:
+            return "chart.xyaxis.line"
+        case .track:
+            return "heart.text.square"
+        case .insight:
+            return "lightbulb"
+        case .profile:
+            return "slider.horizontal.3"
+        }
+    }
+}
+
 struct PolicyDashboardView: View {
     let engine: PolicyEngine
 
@@ -19,6 +44,9 @@ struct PolicyDashboardView: View {
     @State private var isInsightExpanded = false
     @State private var selectedDensityStep: Double?
     @State private var selectedQuantileLevel: Double?
+    @StateObject private var stepTracker = HealthStepTracker()
+    @State private var activeMobileTab: MobileDashboardTab = .plan
+    @State private var lastContentMobileTab: MobileDashboardTab = .plan
 
     init(engine: PolicyEngine) {
         self.engine = engine
@@ -35,19 +63,23 @@ struct PolicyDashboardView: View {
     var body: some View {
         GeometryReader { proxy in
             let isWide = proxy.size.width >= 820
-            ScrollView {
+            Group {
                 if isWide {
-                    HStack(alignment: .top, spacing: 16) {
-                        profileCard(isEmbedded: true)
-                            .frame(width: min(360, proxy.size.width * 0.36))
-                        resultsColumn(isWide: isWide)
+                    ScrollView {
+                        wideContent(proxy: proxy)
                     }
-                    .padding(18)
                 } else {
-                    resultsColumn(isWide: isWide)
-                        .padding(.horizontal, 16)
-                        .padding(.top, 10)
-                        .padding(.bottom, 16)
+                    ScrollView {
+                        mobileContent()
+                            .padding(.horizontal, 16)
+                            .padding(.top, 10)
+                            .padding(.bottom, 10)
+                    }
+                    .safeAreaInset(edge: .bottom) {
+                        MobileDashboardTabBar(selection: activeMobileTab) { tab in
+                            selectMobileTab(tab)
+                        }
+                    }
                 }
             }
             .background(AppTheme.background.ignoresSafeArea())
@@ -57,7 +89,7 @@ struct PolicyDashboardView: View {
                     .ignoresSafeArea(edges: .top)
                     .allowsHitTesting(false)
             }
-            .sheet(isPresented: $isShowingProfileEditor) {
+            .sheet(isPresented: $isShowingProfileEditor, onDismiss: handleProfileDismiss) {
                 NavigationStack {
                     ScrollView {
                         profilePanel(isEmbedded: false)
@@ -80,11 +112,79 @@ struct PolicyDashboardView: View {
         }
     }
 
+    private func wideContent(proxy: GeometryProxy) -> some View {
+        HStack(alignment: .top, spacing: 16) {
+            profileCard(isEmbedded: true)
+                .frame(width: min(360, proxy.size.width * 0.36))
+            resultsColumn(isWide: true)
+        }
+        .padding(18)
+    }
+
+    @ViewBuilder
+    private func mobileContent() -> some View {
+        VStack(alignment: .leading, spacing: 12) {
+            header(isWide: false)
+
+            switch activeMobileTab {
+            case .plan:
+                SummaryGrid(result: result)
+                WalkingPlanPanel(result: result)
+            case .chart:
+                ChartPanel(
+                    engine: engine,
+                    result: result,
+                    mode: $chartMode,
+                    selectedDensityStep: $selectedDensityStep,
+                    selectedQuantileLevel: $selectedQuantileLevel
+                )
+            case .track:
+                HealthTrackerPanel(engine: engine, result: result, tracker: stepTracker)
+            case .insight:
+                InsightPanel(result: result, isExpanded: $isInsightExpanded)
+                SubgroupPanel(result: result)
+                Text("Research use only, not clinical decision making.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.top, 4)
+            case .profile:
+                EmptyView()
+            }
+        }
+    }
+
+    private func selectMobileTab(_ tab: MobileDashboardTab) {
+        if tab == .profile {
+            activeMobileTab = .profile
+            openProfileEditor()
+            return
+        }
+
+        activeMobileTab = tab
+        lastContentMobileTab = tab
+        if isShowingProfileEditor {
+            isShowingProfileEditor = false
+        }
+    }
+
+    private func openProfileEditor() {
+        profileEditorDetent = .height(470)
+        isShowingProfileEditor = true
+    }
+
+    private func handleProfileDismiss() {
+        if activeMobileTab == .profile {
+            activeMobileTab = lastContentMobileTab
+        }
+    }
+
     private func resultsColumn(isWide: Bool) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             header(isWide: isWide)
             SummaryGrid(result: result)
             WalkingPlanPanel(result: result)
+            HealthTrackerPanel(engine: engine, result: result, tracker: stepTracker)
             ChartPanel(
                 engine: engine,
                 result: result,
@@ -124,8 +224,8 @@ struct PolicyDashboardView: View {
             Spacer(minLength: 8)
             if !isWide {
                 Button {
-                    profileEditorDetent = .height(470)
-                    isShowingProfileEditor = true
+                    activeMobileTab = .profile
+                    openProfileEditor()
                 } label: {
                     Image(systemName: "slider.horizontal.3")
                         .font(.title3.weight(.semibold))
@@ -155,6 +255,47 @@ struct PolicyDashboardView: View {
             dismissAfterGenerate: !isEmbedded,
             showsHeader: isEmbedded
         )
+    }
+}
+
+private struct MobileDashboardTabBar: View {
+    let selection: MobileDashboardTab
+    let onSelect: (MobileDashboardTab) -> Void
+
+    var body: some View {
+        HStack(spacing: 4) {
+            ForEach(MobileDashboardTab.allCases) { tab in
+                Button {
+                    onSelect(tab)
+                } label: {
+                    VStack(spacing: 3) {
+                        Image(systemName: tab.systemImage)
+                            .font(.system(size: 20, weight: .semibold))
+                            .frame(height: 22)
+                        Text(tab.rawValue)
+                            .font(.system(size: 11, weight: .bold))
+                            .lineLimit(1)
+                    }
+                    .foregroundStyle(selection == tab ? AppTheme.green : AppTheme.reference)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 7)
+                    .background(selection == tab ? AppTheme.green.opacity(0.10) : .clear)
+                    .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(tab.rawValue)
+            }
+        }
+        .padding(.horizontal, 12)
+        .padding(.top, 8)
+        .padding(.bottom, 8)
+        .background(.white.opacity(0.92))
+        .overlay(alignment: .top) {
+            Rectangle()
+                .fill(AppTheme.line.opacity(0.65))
+                .frame(height: 1)
+        }
+        .shadow(color: AppTheme.ink.opacity(0.08), radius: 30, x: 0, y: -12)
     }
 }
 
@@ -362,6 +503,7 @@ private enum HelpTopic: String, Identifiable {
     case densityFunction
     case quantileFunction
     case subgroupAverage
+    case healthTracker
 
     var id: String { rawValue }
 
@@ -389,6 +531,8 @@ private enum HelpTopic: String, Identifiable {
             return "Quantile function"
         case .subgroupAverage:
             return "Subgroup average"
+        case .healthTracker:
+            return "Health step tracker"
         }
     }
 
@@ -416,6 +560,8 @@ private enum HelpTopic: String, Identifiable {
             return "This curve maps a percentile of days to a daily step level. For example, lower percentiles represent lower-activity days."
         case .subgroupAverage:
             return "The gray curve averages recommendations for similar profiles with the same glucose, age, BMI, blood pressure, sex, and glucose-source group."
+        case .healthTracker:
+            return "The iOS app can request HealthKit permission to read Apple Health step counts for the selected 90-day cycle. The data stays on this device."
         }
     }
 }
@@ -692,6 +838,308 @@ private struct WalkingPlanRow: View {
         }
         .padding(10)
         .background(isPrimary ? AppTheme.green.opacity(0.08) : AppTheme.background)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
+private struct HealthTrackerPanel: View {
+    let engine: PolicyEngine
+    let result: PolicyResult
+    @ObservedObject var tracker: HealthStepTracker
+    @State private var activeHelp: HelpTopic?
+
+    private var metrics: StepTrackerMetrics {
+        tracker.metrics(for: result, engine: engine)
+    }
+
+    var body: some View {
+        let metrics = metrics
+
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Health 90-day tracker")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(AppTheme.ink)
+                    Text("Our iOS app can connect through HealthKit to read daily steps from Apple Health after permission is granted.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                HelpButton(color: AppTheme.green) {
+                    activeHelp = .healthTracker
+                }
+            }
+
+            VStack(spacing: 10) {
+                DatePicker(
+                    "Cycle start date",
+                    selection: $tracker.cycleStartDate,
+                    in: ...Date(),
+                    displayedComponents: .date
+                )
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(AppTheme.ink)
+                .datePickerStyle(.compact)
+                .padding(10)
+                .background(AppTheme.background)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+
+                HStack(alignment: .center, spacing: 10) {
+                    Button {
+                        Task {
+                            await tracker.connectAndLoad()
+                        }
+                    } label: {
+                        Label(
+                            tracker.hasRequestedHealthAccess ? "Refresh Health" : "Connect Health",
+                            systemImage: "heart.text.square"
+                        )
+                        .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .tint(AppTheme.green)
+                    .disabled(isLoading)
+
+                    if isLoading {
+                        ProgressView()
+                            .tint(AppTheme.green)
+                    }
+                }
+
+                Text(tracker.statusMessage)
+                    .font(.footnote)
+                    .foregroundStyle(statusColor)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            TrackerScoreCard(metrics: metrics)
+            TrackerAverageGrid(metrics: metrics)
+
+            VStack(spacing: 10) {
+                ForEach(metrics.goals) { goal in
+                    TrackerGoalRow(goal: goal)
+                }
+            }
+        }
+        .cardStyle()
+        .accessibilityIdentifier("healthTracker")
+        .onChange(of: tracker.cycleStartDate) { _, _ in
+            Task {
+                await tracker.reloadIfConnected()
+            }
+        }
+        .alert(item: $activeHelp) { topic in
+            Alert(
+                title: Text(topic.title),
+                message: Text(topic.message),
+                dismissButton: .default(Text("Got it"))
+            )
+        }
+    }
+
+    private var isLoading: Bool {
+        if case .loading = tracker.state { return true }
+        return false
+    }
+
+    private var statusColor: Color {
+        switch tracker.state {
+        case .failed, .unavailable:
+            return .red
+        default:
+            return .secondary
+        }
+    }
+}
+
+private struct TrackerScoreCard: View {
+    let metrics: StepTrackerMetrics
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 3) {
+                    Text("Plan match score")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.ink)
+                    Text(metrics.scoreMessage)
+                        .font(.footnote)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                VStack(alignment: .trailing, spacing: 4) {
+                    Text(metrics.score.map(String.init) ?? "--")
+                        .font(.system(size: 34, weight: .bold))
+                        .foregroundStyle(AppTheme.green)
+                        .lineLimit(1)
+                    Text(metrics.scoreStage)
+                        .font(.caption2.weight(.bold))
+                        .foregroundStyle(AppTheme.green)
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 4)
+                        .background(Color.white.opacity(0.82))
+                        .clipShape(Capsule())
+                }
+            }
+
+            ScoreScale(progress: metrics.scoreProgress)
+        }
+        .padding(12)
+        .background(AppTheme.green.opacity(0.08))
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
+private struct ScoreScale: View {
+    let progress: Double
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            GeometryReader { proxy in
+                let width = proxy.size.width
+                let markerX = max(8, min(width - 8, width * progress))
+
+                ZStack(alignment: .leading) {
+                    Capsule()
+                        .fill(
+                            LinearGradient(
+                                colors: [
+                                    AppTheme.green.opacity(0.14),
+                                    AppTheme.green.opacity(0.22),
+                                    AppTheme.green.opacity(0.34),
+                                    AppTheme.green.opacity(0.48)
+                                ],
+                                startPoint: .leading,
+                                endPoint: .trailing
+                            )
+                        )
+                        .frame(height: 8)
+
+                    Capsule()
+                        .fill(AppTheme.green)
+                        .frame(width: width * progress, height: 8)
+
+                    Circle()
+                        .fill(.white)
+                        .overlay(Circle().stroke(AppTheme.green, lineWidth: 3))
+                        .shadow(color: AppTheme.ink.opacity(0.18), radius: 5, x: 0, y: 2)
+                        .frame(width: 16, height: 16)
+                        .offset(x: markerX - 8)
+                }
+            }
+            .frame(height: 16)
+
+            HStack(alignment: .top) {
+                Text("Collecting data")
+                Spacer()
+                Text("Building rhythm")
+                Spacer()
+                Text("Close to plan")
+                Spacer()
+                Text("Strong match")
+                    .multilineTextAlignment(.trailing)
+            }
+            .font(.caption2.weight(.semibold))
+            .foregroundStyle(.secondary)
+        }
+    }
+}
+
+private struct TrackerAverageGrid: View {
+    let metrics: StepTrackerMetrics
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 10) {
+            TrackerStatTile(title: "Current cycle", value: metrics.currentCycleLabel)
+                .frame(maxWidth: .infinity)
+
+            VStack(alignment: .leading, spacing: 6) {
+                Text("90-day average progress")
+                    .font(.caption2.weight(.bold))
+                    .foregroundStyle(.secondary)
+                HStack(spacing: 10) {
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("So far")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.secondary)
+                        Text(metrics.averageSoFar)
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(AppTheme.ink)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                    }
+                    Divider()
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text("Needed next")
+                            .font(.caption2.weight(.bold))
+                            .foregroundStyle(.secondary)
+                        Text(metrics.neededNext)
+                            .font(.headline.weight(.bold))
+                            .foregroundStyle(AppTheme.ink)
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.75)
+                    }
+                }
+            }
+            .padding(10)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(AppTheme.background)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        }
+    }
+}
+
+private struct TrackerStatTile: View {
+    let title: String
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(title)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.headline.weight(.bold))
+                .foregroundStyle(AppTheme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.78)
+        }
+        .padding(10)
+        .background(AppTheme.background)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+}
+
+private struct TrackerGoalRow: View {
+    let goal: DayCountGoalProgress
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(goal.title)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.secondary)
+                Text("\(goal.count) / \(goal.targetDays) days")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(AppTheme.ink)
+                Text("At least \(goal.thresholdRounded) steps.")
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer(minLength: 8)
+            Text(goal.status)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(AppTheme.green)
+                .padding(.horizontal, 10)
+                .padding(.vertical, 7)
+                .background(AppTheme.green.opacity(0.10))
+                .clipShape(Capsule())
+        }
+        .padding(10)
+        .background(AppTheme.background)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }
