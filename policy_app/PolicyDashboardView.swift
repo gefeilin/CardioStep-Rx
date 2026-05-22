@@ -1543,11 +1543,11 @@ private struct ChartLegendRow: View {
     }
 
     private var redMarkerLabel: String {
-        mode == .density ? "Most common" : "Q0.33"
+        mode == .density ? "Most common" : "Q33"
     }
 
     private var blueMarkerLabel: String {
-        mode == .density ? "90-day average" : "Q0.67"
+        mode == .density ? "90-day average" : "Q67"
     }
 }
 
@@ -1912,7 +1912,7 @@ private struct QuantileChart: View {
                 id: "q33",
                 level: 0.33,
                 steps: result.q33,
-                label: "Q0.33 ≈ \(result.q33Rounded)",
+                label: "Q33 ≈ \(result.q33Rounded)",
                 color: AppTheme.red,
                 annotationPosition: .bottom
             ),
@@ -1920,7 +1920,7 @@ private struct QuantileChart: View {
                 id: "q67",
                 level: 0.67,
                 steps: result.q67,
-                label: "Q0.67 ≈ \(result.q67Rounded)",
+                label: "Q67 ≈ \(result.q67Rounded)",
                 color: AppTheme.blue,
                 annotationPosition: .top
             )

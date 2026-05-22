@@ -2939,8 +2939,8 @@ function quantileYMax(quantile, referenceQuantile) {
 
 function updateLegend() {
   const primaryClass = chartMode === "density" ? "individual-density" : "individual-quantile";
-  const redLabel = chartMode === "density" ? "Most frequent" : "Q0.33";
-  const blueLabel = chartMode === "density" ? "90-day average" : "Q0.67";
+  const redLabel = chartMode === "density" ? "Most frequent" : "Q33";
+  const blueLabel = chartMode === "density" ? "90-day average" : "Q67";
   document.getElementById("chart-legend").innerHTML = `
     <div class="legend-row">
       <span class="legend-item ${primaryClass}">
@@ -3084,7 +3084,7 @@ function renderChart() {
       {
         x: [0.33],
         y: [ctx.q33],
-        text: [`Q0.33 ≈ ${ctx.q33Rounded} steps`],
+        text: [`Q33 ≈ ${ctx.q33Rounded} steps`],
         type: "scatter",
         mode: "markers",
         marker: {color: THEME.red, size: 9},
@@ -3093,7 +3093,7 @@ function renderChart() {
       {
         x: [0.67],
         y: [ctx.q67],
-        text: [`Q0.67 ≈ ${ctx.q67Rounded} steps`],
+        text: [`Q67 ≈ ${ctx.q67Rounded} steps`],
         type: "scatter",
         mode: "markers",
         marker: {color: THEME.blue, size: 9},
