@@ -804,6 +804,10 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       padding-top: 7px;
     }
 
+    .score-meter[hidden] {
+      display: none;
+    }
+
     .score-bar {
       height: 8px;
       overflow: hidden;
@@ -1872,14 +1876,14 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
           <div class="score-row">
             <div>
               <div class="score-label">Plan match score</div>
-              <div class="score-copy" id="track-score-copy">Shows how closely your logged steps are following the 90-day plan.</div>
+              <div class="score-copy" id="track-score-copy">Add at least 7 days of steps to calculate a Plan match score.</div>
             </div>
             <div class="score-value-group">
               <div class="score-value" id="track-score">--</div>
               <div class="score-stage" id="track-score-stage">Not started</div>
             </div>
           </div>
-          <div class="score-meter" aria-hidden="true">
+          <div class="score-meter" id="track-score-meter" aria-hidden="true" hidden>
             <div class="score-marker" id="track-score-marker"></div>
             <div class="score-bar"><span id="track-score-bar"></span></div>
             <div class="score-scale">
@@ -2813,6 +2817,7 @@ const HELP_TOPICS = {
 let chartMode = "density";
 let currentViewModel = null;
 const TRACK_STORAGE_KEY = "cardioStepRxManualTrackV2";
+const MIN_SCORE_DAYS = 7;
 
 function setText(id, text) {
   const element = document.getElementById(id);
@@ -3198,12 +3203,47 @@ function updateScoreMeter(percent) {
   if (marker) marker.style.left = `${clamp(clipped, 4, 96)}%`;
 }
 
+function setScoreMeterVisible(isVisible) {
+  const meter = document.getElementById("track-score-meter");
+  if (meter) meter.hidden = !isVisible;
+}
+
 function trackScoreStage(score, loggedDays) {
   if (loggedDays === 0) return "Not started";
   if (loggedDays < 7) return "Getting started";
   if (score >= 80) return "On plan";
   if (score >= 60) return "Close";
   return "Needs attention";
+}
+
+function meanAlignmentScore(average, target) {
+  const isUnderTarget = average < target;
+  const tolerance = Math.max(isUnderTarget ? 1200 : 1800, target * (isUnderTarget ? 0.18 : 0.25));
+  const error = Math.abs(average - target);
+  return clamp(100 * (1 - error / (2 * tolerance)), 0, 100);
+}
+
+function distributionShapeScore(stepValues, ctx) {
+  const levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
+  const recommendedQuantiles = interpolate(APP_DATA.supports.lqd, ctx.result.quantile, levels);
+  const meanAbsError = levels.reduce((sum, level, index) => {
+    return sum + Math.abs(actualQuantile(stepValues, level) - recommendedQuantiles[index]);
+  }, 0) / levels.length;
+  const tolerance = Math.max(1800, ctx.meanSteps * 0.22);
+  return clamp(100 * (1 - meanAbsError / (2 * tolerance)), 0, 100);
+}
+
+function planMatchScore(stepValues, averageSoFar, goalScores, ctx) {
+  const loggedDays = stepValues.length;
+  const averageScore = meanAlignmentScore(averageSoFar, ctx.meanSteps);
+  const goalScore = goalScores.reduce((sum, value) => sum + value, 0) / Math.max(goalScores.length, 1);
+  const shapeScore = distributionShapeScore(stepValues, ctx);
+  const shapeReliability = clamp((loggedDays - MIN_SCORE_DAYS) / 23, 0, 1);
+  const shapeWeight = 0.20 * shapeReliability;
+  const totalWeight = 0.45 + 0.35 + shapeWeight;
+  const rawScore = ((averageScore * 0.45) + (goalScore * 0.35) + (shapeScore * shapeWeight)) / totalWeight;
+  const sampleReliability = clamp((loggedDays - 6) / 24, 0.25, 1);
+  return Math.round(clamp((75 * (1 - sampleReliability)) + (rawScore * sampleReliability), 0, 100));
 }
 
 function updateTrackPanel(ctx) {
@@ -3287,38 +3327,26 @@ function updateTrackPanel(ctx) {
     setText(`track-${goal.key}-badge`, loggedDays ? trackStatusLabel(ratio, loggedDays) : "--");
   });
 
-  if (loggedDays === 0) {
+  if (loggedDays < MIN_SCORE_DAYS) {
     setText("track-score", "--");
     setText("track-score-stage", trackScoreStage(0, loggedDays));
-    setText("track-score-copy", "Enter steps to start. The score will compare your average and goal-day counts with the 90-day plan.");
+    setText("track-score-copy", loggedDays === 0
+      ? "Add at least 7 days of steps to calculate a Plan match score."
+      : `Getting started: ${loggedDays} of 7 days logged. The score starts after 7 days so it is not based on too little data.`);
+    setScoreMeterVisible(false);
     updateScoreMeter(0);
     return;
   }
 
-  const averageScore = clamp(100 - (Math.abs(averageSoFar - ctx.meanSteps) / 80), 0, 100);
-  let distributionScore = averageScore;
-  if (loggedDays >= 7) {
-    const levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9];
-    const recommendedQuantiles = interpolate(APP_DATA.supports.lqd, ctx.result.quantile, levels);
-    const meanAbsError = levels.reduce((sum, level, index) => {
-      return sum + Math.abs(actualQuantile(stepValues, level) - recommendedQuantiles[index]);
-    }, 0) / levels.length;
-    const quantileScore = Math.max(0, 100 - meanAbsError / 50);
-    const distributionWeight = clamp((loggedDays - 7) / 23, 0, 1);
-    distributionScore = (averageScore * (1 - distributionWeight)) + (quantileScore * distributionWeight);
-  }
-  const goalScore = goalScores.reduce((sum, value) => sum + value, 0) / goalScores.length;
-  const rawPlanScore = Math.round(0.55 * distributionScore + 0.45 * goalScore);
-  const confidence = clamp(loggedDays / 30, 0, 1);
-  const planScore = Math.round((75 * (1 - confidence)) + (rawPlanScore * confidence));
-  const score = clamp(planScore, 0, 100);
+  const score = planMatchScore(stepValues, averageSoFar, goalScores, ctx);
   setText("track-score", `${score}`);
   setText("track-score-stage", trackScoreStage(score, loggedDays));
   setText("track-score-copy", score >= 80
-    ? "You are on pace: your average steps and goal-day counts are close to the 90-day plan."
+    ? "On plan: your average, goal-day counts, and step pattern are close to the 90-day prescription."
     : score >= 60
-      ? "You are close: your average steps or goal-day counts need a little more support."
-      : "Needs attention: your average steps or goal-day counts are below the planned pace. Focus on the next few days.");
+      ? "Close: one part of the plan needs support, such as average steps, goal-day counts, or the overall step pattern."
+      : "Needs attention: your logged pattern is not yet matching the recommended 90-day distribution. Focus on the next few days.");
+  setScoreMeterVisible(true);
   updateScoreMeter(score);
 }
 

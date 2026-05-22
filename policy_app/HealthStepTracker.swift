@@ -150,9 +150,9 @@ final class HealthStepTracker: ObservableObject {
             : nil
 
         let goals = [
-            makeGoal(id: "usual", title: "Usual-days goal", targetDays: 60, threshold: result.q33, thresholdRounded: result.q33Rounded, stepValues: stepValues, loggedDays: loggedDays),
-            makeGoal(id: "middle", title: "Middle-days goal", targetDays: 45, threshold: result.q50, thresholdRounded: result.q50Rounded, stepValues: stepValues, loggedDays: loggedDays),
-            makeGoal(id: "active", title: "Active-days goal", targetDays: 30, threshold: result.q67, thresholdRounded: result.q67Rounded, stepValues: stepValues, loggedDays: loggedDays)
+            makeGoal(id: "usual", title: "Easy-day goal", targetDays: 60, threshold: result.q33, thresholdRounded: result.q33Rounded, stepValues: stepValues, loggedDays: loggedDays),
+            makeGoal(id: "middle", title: "Regular-day goal", targetDays: 45, threshold: result.q50, thresholdRounded: result.q50Rounded, stepValues: stepValues, loggedDays: loggedDays),
+            makeGoal(id: "active", title: "Active-day goal", targetDays: 30, threshold: result.q67, thresholdRounded: result.q67Rounded, stepValues: stepValues, loggedDays: loggedDays)
         ]
 
         let scoreInfo = liveScore(
@@ -282,43 +282,69 @@ final class HealthStepTracker: ObservableObject {
             return (
                 nil,
                 "Not started",
-                "Connect Health to start. The score compares average steps with the number of days meeting each goal.",
+                "Add at least 7 days of steps to calculate a Plan match score.",
                 0
             )
         }
 
-        let averageScore = clamp(100 - (abs(average - result.meanSteps) / 80), min: 0, max: 100)
-        var distributionScore = averageScore
-        if loggedDays >= 7 {
-            let levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
-            let errors = levels.map { level in
-                abs(actualQuantile(stepValues, level: level) - engine.nearestQuantilePoint(in: result, level: level).individual)
-            }
-            let meanAbsError = errors.reduce(0, +) / Double(errors.count)
-            let quantileScore = max(0, 100 - meanAbsError / 50)
-            let distributionWeight = clamp((Double(loggedDays) - 7) / 23, min: 0, max: 1)
-            distributionScore = averageScore * (1 - distributionWeight) + quantileScore * distributionWeight
+        guard loggedDays >= 7 else {
+            return (
+                nil,
+                "Getting started",
+                "Getting started: \(loggedDays) of 7 days logged. The score starts after 7 days so it is not based on too little data.",
+                0
+            )
         }
 
+        let averageScore = meanAlignmentScore(average: average, target: result.meanSteps)
         let goalScores = goals.map { goal -> Double in
             guard goal.targetDays > 0 else { return 0 }
             let expectedForLogged = max(1, Int(round((Double(loggedDays) / 90) * Double(goal.targetDays))))
             return min(Double(goal.count) / Double(expectedForLogged), 1) * 100
         }
         let goalScore = goalScores.reduce(0, +) / Double(max(goalScores.count, 1))
-        let rawScore = round(0.55 * distributionScore + 0.45 * goalScore)
-        let confidence = clamp(Double(loggedDays) / 30, min: 0, max: 1)
-        let score = Int(clamp(round(75 * (1 - confidence) + rawScore * confidence), min: 0, max: 100))
+        let distributionScore = distributionShapeScore(stepValues: stepValues, result: result, engine: engine)
+        let distributionReliability = clamp((Double(loggedDays) - 7) / 23, min: 0, max: 1)
+        let distributionWeight = 0.20 * distributionReliability
+        let totalWeight = 0.45 + 0.35 + distributionWeight
+        let rawScore = (
+            averageScore * 0.45 +
+            goalScore * 0.35 +
+            distributionScore * distributionWeight
+        ) / totalWeight
+        let sampleReliability = clamp((Double(loggedDays) - 6) / 24, min: 0.25, max: 1)
+        let score = Int(clamp(round(75 * (1 - sampleReliability) + rawScore * sampleReliability), min: 0, max: 100))
         let message: String
         if score >= 80 {
-            message = "You are on pace: your average steps and completed goal days are close to the 90-day plan."
+            message = "On plan: your average, goal-day counts, and step pattern are close to the 90-day prescription."
         } else if score >= 60 {
-            message = "You are close: your average steps or completed goal days need a little more support."
+            message = "Close: one part of the plan needs support, such as average steps, goal-day counts, or the overall step pattern."
         } else {
-            message = "Needs attention: average steps or completed goal days are below the planned pace. Focus on the next few days."
+            message = "Needs attention: your logged pattern is not yet matching the recommended 90-day distribution. Focus on the next few days."
         }
 
         return (score, scoreStage(score: score, loggedDays: loggedDays), message, Double(score) / 100)
+    }
+
+    private func meanAlignmentScore(average: Double, target: Double) -> Double {
+        let isUnderTarget = average < target
+        let tolerance = Swift.max(isUnderTarget ? 1_200 : 1_800, target * (isUnderTarget ? 0.18 : 0.25))
+        let error = abs(average - target)
+        return clamp(100 * (1 - error / (2 * tolerance)), min: 0, max: 100)
+    }
+
+    private func distributionShapeScore(
+        stepValues: [Double],
+        result: PolicyResult,
+        engine: PolicyEngine
+    ) -> Double {
+        let levels = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        let errors = levels.map { level in
+            abs(actualQuantile(stepValues, level: level) - engine.nearestQuantilePoint(in: result, level: level).individual)
+        }
+        let meanAbsError = errors.reduce(0, +) / Double(errors.count)
+        let tolerance = Swift.max(1_800, result.meanSteps * 0.22)
+        return clamp(100 * (1 - meanAbsError / (2 * tolerance)), min: 0, max: 100)
     }
 
     private func statusLabel(ratio: Double, loggedDays: Int) -> String {

@@ -584,7 +584,7 @@ private enum HelpTopic: String, Identifiable {
         case .subgroupAverage:
             return "The gray curve summarizes recommendations for profiles with similar glucose, age, BMI, blood pressure, sex, and glucose-source group."
         case .healthTracker:
-            return "The iOS app can request HealthKit permission to read Apple Health step counts for the selected 90-day cycle. The data stays on this device."
+            return "The iOS app can request HealthKit permission to read Apple Health step counts for the selected 90-day cycle. The Plan match score starts after at least 7 days of data."
         }
     }
 }
@@ -1251,7 +1251,9 @@ private struct TrackerScoreCard: View {
                 }
             }
 
-            ScoreScale(progress: metrics.scoreProgress)
+            if metrics.score != nil {
+                ScoreScale(progress: metrics.scoreProgress)
+            }
         }
         .padding(12)
         .background(AppTheme.green.opacity(0.08))
