@@ -3097,7 +3097,7 @@ function todayPlanningGuide(ctx) {
   if (activeCount < expectedActive) {
     return {
       title: "Active-day opportunity",
-      rangeText: planningRangeText(ctx.q67, Math.min(ctx.q67 * 1.2, 22300)),
+      rangeText: `≈ ${ctx.q67Rounded} steps or more`,
       detail: "Your active-day count is behind the pace for about 30 active days in this 90-day plan.",
     };
   }

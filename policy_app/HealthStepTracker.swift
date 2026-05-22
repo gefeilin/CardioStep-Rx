@@ -207,7 +207,7 @@ final class HealthStepTracker: ObservableObject {
         if activeCount < expectedActive {
             return TodayPlanningGuide(
                 title: "Active-day opportunity",
-                rangeText: "\(result.q67Rounded)-\(formatHundred(min(result.q67 * 1.2, 22_300))) steps",
+                rangeText: "≈ \(result.q67Rounded) steps or more",
                 detail: "Your active-day count is behind the pace for about 30 active days in this 90-day plan."
             )
         }
