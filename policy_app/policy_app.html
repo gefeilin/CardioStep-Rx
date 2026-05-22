@@ -14,6 +14,11 @@
   <link rel="icon" type="image/png" sizes="32x32" href="favicon.png">
   <link rel="manifest" href="manifest.webmanifest">
   <script>
+    if ("scrollRestoration" in history) {
+      history.scrollRestoration = "manual";
+    }
+  </script>
+  <script>
 /**
 * plotly.js v2.12.1
 * Copyright 2012-2022, Plotly, Inc.
@@ -3816,6 +3821,13 @@ function syncResponsiveState() {
   syncMobileTabPanels();
 }
 
+function scrollToPageTop() {
+  if (!window.scrollTo) return;
+  window.requestAnimationFrame(() => window.scrollTo({top: 0, left: 0, behavior: "auto"}));
+  window.setTimeout(() => window.scrollTo({top: 0, left: 0, behavior: "auto"}), 80);
+  window.setTimeout(() => window.scrollTo({top: 0, left: 0, behavior: "auto"}), 360);
+}
+
 function hideLaunchScreen() {
   const launchScreen = document.getElementById("app-launch-screen");
   if (!launchScreen) return;
@@ -3826,6 +3838,8 @@ function hideLaunchScreen() {
 }
 
 window.addEventListener("resize", syncResponsiveState);
+window.addEventListener("load", scrollToPageTop);
+window.addEventListener("pageshow", scrollToPageTop);
 mobileViewportQuery.addEventListener?.("change", syncResponsiveState);
 syncProfilePanelVisibility();
 resetExample();
@@ -3833,9 +3847,7 @@ syncMobileTabPanels();
 if (shouldOpenInitialProfile && isMobileSheetMode()) {
   selectMobileTab("profile");
 }
-if (window.scrollTo) {
-  setTimeout(() => window.scrollTo(0, 0), 0);
-}
+scrollToPageTop();
 hideLaunchScreen();
 </script>
 </body>
