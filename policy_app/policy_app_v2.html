@@ -1452,6 +1452,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         visibility: hidden;
         pointer-events: none;
         overscroll-behavior: contain;
+        touch-action: pan-y;
         transform: translateY(var(--sheet-offset));
         transition:
           transform 200ms cubic-bezier(0.2, 0.8, 0.2, 1),
@@ -3566,8 +3567,10 @@ if (["plan", "track", "chart", "insight"].includes(initialMobileTab)) {
 }
 const sheetDragState = {
   active: false,
+  pending: false,
   pointerId: null,
   startY: 0,
+  startX: 0,
   lastY: 0,
   startTime: 0,
   lastTime: 0,
@@ -3604,6 +3607,7 @@ function closeProfilePanel() {
   }
   profileBackdrop.hidden = true;
   sheetDragState.active = false;
+  sheetDragState.pending = false;
   sheetDragState.pointerId = null;
   if (isMobileSheetMode() && activeMobileTab === "profile") {
     activeMobileTab = lastContentTab;
@@ -3676,19 +3680,44 @@ function beginSheetDrag(event) {
   if (!isMobileSheetMode() || !profilePanel.classList.contains("is-open")) return;
   if (event.target.closest("button, input, select, textarea, label")) return;
 
-  sheetDragState.active = true;
+  const fromHandle = Boolean(event.target.closest(".sheet-handle, .section-heading"));
+  const canPullFromContent = profilePanel.scrollTop <= 1;
+  if (!fromHandle && !canPullFromContent) return;
+
+  sheetDragState.active = fromHandle;
+  sheetDragState.pending = !fromHandle;
   sheetDragState.pointerId = event.pointerId;
   sheetDragState.startY = event.clientY;
+  sheetDragState.startX = event.clientX;
   sheetDragState.lastY = event.clientY;
   sheetDragState.startTime = event.timeStamp;
   sheetDragState.lastTime = event.timeStamp;
-  profilePanel.classList.add("is-dragging");
-  profilePanel.setPointerCapture?.(event.pointerId);
+
+  if (fromHandle) {
+    profilePanel.classList.add("is-dragging");
+    profilePanel.setPointerCapture?.(event.pointerId);
+  }
 }
 
 function moveSheetDrag(event) {
-  if (!sheetDragState.active || event.pointerId !== sheetDragState.pointerId) return;
-  const offset = Math.max(0, event.clientY - sheetDragState.startY);
+  if ((!sheetDragState.active && !sheetDragState.pending) || event.pointerId !== sheetDragState.pointerId) return;
+  const deltaY = event.clientY - sheetDragState.startY;
+  const deltaX = Math.abs(event.clientX - sheetDragState.startX);
+
+  if (sheetDragState.pending) {
+    if (deltaY < -6 || deltaX > Math.abs(deltaY) + 8) {
+      sheetDragState.pending = false;
+      sheetDragState.pointerId = null;
+      return;
+    }
+    if (deltaY < 8) return;
+    sheetDragState.pending = false;
+    sheetDragState.active = true;
+    profilePanel.classList.add("is-dragging");
+    profilePanel.setPointerCapture?.(event.pointerId);
+  }
+
+  const offset = Math.max(0, deltaY);
   setSheetOffset(offset);
   sheetDragState.lastY = event.clientY;
   sheetDragState.lastTime = event.timeStamp;
@@ -3696,7 +3725,13 @@ function moveSheetDrag(event) {
 }
 
 function endSheetDrag(event) {
-  if (!sheetDragState.active || event.pointerId !== sheetDragState.pointerId) return;
+  if ((!sheetDragState.active && !sheetDragState.pending) || event.pointerId !== sheetDragState.pointerId) return;
+
+  if (sheetDragState.pending) {
+    sheetDragState.pending = false;
+    sheetDragState.pointerId = null;
+    return;
+  }
 
   const offset = Math.max(0, event.clientY - sheetDragState.startY);
   const elapsed = Math.max(1, event.timeStamp - sheetDragState.startTime);
@@ -3705,6 +3740,7 @@ function endSheetDrag(event) {
   const shouldClose = offset > closeDistance || velocity > 0.72;
 
   sheetDragState.active = false;
+  sheetDragState.pending = false;
   sheetDragState.pointerId = null;
   profilePanel.releasePointerCapture?.(event.pointerId);
   profilePanel.classList.remove("is-dragging");
@@ -3779,9 +3815,7 @@ document.querySelectorAll("input[name='sex-choice']").forEach((input) => {
 document.getElementById("close-profile").addEventListener("click", closeProfilePanel);
 profileBackdrop.addEventListener("click", closeProfilePanel);
 
-[document.querySelector(".sheet-handle"), profilePanel.querySelector(".section-heading")].forEach((dragTarget) => {
-  dragTarget?.addEventListener("pointerdown", beginSheetDrag);
-});
+profilePanel.addEventListener("pointerdown", beginSheetDrag);
 profilePanel.addEventListener("pointermove", moveSheetDrag);
 profilePanel.addEventListener("pointerup", endSheetDrag);
 profilePanel.addEventListener("pointercancel", endSheetDrag);
