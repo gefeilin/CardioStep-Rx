@@ -2931,7 +2931,7 @@ function updateTrackPanel(ctx) {
     setText(`track-${goal.key}-count`, `${count} / ${goal.targetDays} days`);
     setText(
       `track-${goal.key}-detail`,
-      `At least ${goal.rounded} steps. Expected for entered days: ${loggedDays ? expectedForLogged : 0}.`
+      `At least ${goal.rounded} steps.`
     );
     setText(`track-${goal.key}-badge`, loggedDays ? trackStatusLabel(ratio, loggedDays) : "--");
   });
