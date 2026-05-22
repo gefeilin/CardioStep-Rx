@@ -8,6 +8,7 @@ import HealthKit
 struct DailyStepRecord: Identifiable, Equatable {
     let date: Date
     let steps: Double
+    let hasData: Bool
 
     var id: Date { date }
 }
@@ -25,11 +26,21 @@ struct StepTrackerMetrics: Equatable {
     let currentCycleLabel: String
     let averageSoFar: String
     let neededNext: String
+    let lowStepDays: String
+    let highStepDays: String
+    let missingStepDays: String
+    let dataCheckNote: String
     let score: Int?
     let scoreStage: String
     let scoreMessage: String
     let scoreProgress: Double
     let goals: [DayCountGoalProgress]
+}
+
+struct TodayPlanningGuide: Equatable {
+    let title: String
+    let rangeText: String
+    let detail: String
 }
 
 @MainActor
@@ -125,10 +136,14 @@ final class HealthStepTracker: ObservableObject {
     }
 
     func metrics(for result: PolicyResult, engine: PolicyEngine) -> StepTrackerMetrics {
-        let stepValues = records.map(\.steps)
+        let hasStepRead = state == .ready || !records.isEmpty
+        let observedRecords = records.filter(\.hasData)
+        let stepValues = observedRecords.map(\.steps)
         let loggedDays = stepValues.count
         let totalSteps = stepValues.reduce(0, +)
         let average = loggedDays > 0 ? totalSteps / Double(loggedDays) : nil
+        let checkedDays = currentCycleDay
+        let missingDays = max(0, checkedDays - observedRecords.count)
         let remainingDays = max(90 - loggedDays, 0)
         let needed = remainingDays > 0 && loggedDays > 0
             ? max(0, (result.meanSteps * 90 - totalSteps) / Double(remainingDays))
@@ -152,6 +167,12 @@ final class HealthStepTracker: ObservableObject {
             currentCycleLabel: "Day \(currentCycleDay) of 90",
             averageSoFar: average.map(formatHundred) ?? "--",
             neededNext: needed.map(formatHundred) ?? "--",
+            lowStepDays: hasStepRead ? "\(stepValues.filter { $0 < 100 }.count)" : "--",
+            highStepDays: hasStepRead ? "\(stepValues.filter { $0 > 22300 }.count)" : "--",
+            missingStepDays: hasStepRead ? "\(missingDays)" : "--",
+            dataCheckNote: hasStepRead
+                ? "Checked \(checkedDays) day\(checkedDays == 1 ? "" : "s") in this cycle. Future days are not counted as missing."
+                : "Connect Health to check missing or out-of-range step days.",
             score: scoreInfo.score,
             scoreStage: scoreInfo.stage,
             scoreMessage: scoreInfo.message,
@@ -160,10 +181,71 @@ final class HealthStepTracker: ObservableObject {
         )
     }
 
+    func todayPlanningGuide(for result: PolicyResult) -> TodayPlanningGuide {
+        let observedRecords = records.filter(\.hasData)
+        let stepValues = observedRecords.map(\.steps)
+        let loggedDays = stepValues.count
+
+        guard loggedDays > 0 else {
+            return TodayPlanningGuide(
+                title: "Easy-regular day",
+                rangeText: "\(result.q33Rounded)-\(result.q50Rounded) steps",
+                detail: "Start with this practical range while your 90-day progress data builds up."
+            )
+        }
+
+        let cycleDay = currentCycleDay
+        let easyCount = stepValues.filter { $0 >= result.q33 }.count
+        let regularCount = stepValues.filter { $0 >= result.q50 }.count
+        let activeCount = stepValues.filter { $0 >= result.q67 }.count
+        let expectedEasy = expectedGoalDays(by: cycleDay, targetDays: 60)
+        let expectedRegular = expectedGoalDays(by: cycleDay, targetDays: 45)
+        let expectedActive = expectedGoalDays(by: cycleDay, targetDays: 30)
+        let average = stepValues.reduce(0, +) / Double(loggedDays)
+        let averageBehind = average < result.meanSteps * 0.95
+
+        if activeCount < expectedActive {
+            return TodayPlanningGuide(
+                title: "Active-day opportunity",
+                rangeText: "\(result.q67Rounded)-\(formatHundred(min(result.q67 * 1.2, 22_300))) steps",
+                detail: "Your active-day count is behind the pace for about 30 active days in this 90-day plan."
+            )
+        }
+
+        if regularCount < expectedRegular || averageBehind {
+            return TodayPlanningGuide(
+                title: "Regular-active day",
+                rangeText: "\(result.q50Rounded)-\(result.q67Rounded) steps",
+                detail: "This range helps support your regular-day count or 90-day average progress."
+            )
+        }
+
+        if average >= result.meanSteps * 1.08,
+           easyCount >= expectedEasy,
+           regularCount >= expectedRegular,
+           activeCount >= expectedActive {
+            return TodayPlanningGuide(
+                title: "Easy day is fine",
+                rangeText: "\(result.q33Rounded)-\(result.q50Rounded) steps",
+                detail: "Your current pattern is ahead of pace, so a lighter day can still fit the 90-day distribution."
+            )
+        }
+
+        return TodayPlanningGuide(
+            title: "Easy-regular day",
+            rangeText: "\(result.q33Rounded)-\(result.q50Rounded) steps",
+            detail: "Your current pattern is on pace, so use this practical range for today."
+        )
+    }
+
     private var currentCycleDay: Int {
         let today = calendar.startOfDay(for: Date())
         let offset = calendar.dateComponents([.day], from: cycleStartDate, to: today).day ?? 0
         return Int(clamp(Double(offset + 1), min: 1, max: 90))
+    }
+
+    private func expectedGoalDays(by cycleDay: Int, targetDays: Int) -> Int {
+        Int(floor((Double(cycleDay) / 90) * Double(targetDays)))
     }
 
     private func makeGoal(
@@ -199,8 +281,8 @@ final class HealthStepTracker: ObservableObject {
         guard loggedDays > 0, let average else {
             return (
                 nil,
-                "Waiting",
-                "Connect Health to start the live score.",
+                "Not started",
+                "Connect Health to start. The score compares average steps with the number of days meeting each goal.",
                 0
             )
         }
@@ -227,14 +309,13 @@ final class HealthStepTracker: ObservableObject {
         let rawScore = round(0.55 * distributionScore + 0.45 * goalScore)
         let confidence = clamp(Double(loggedDays) / 30, min: 0, max: 1)
         let score = Int(clamp(round(75 * (1 - confidence) + rawScore * confidence), min: 0, max: 100))
-        let prefix = loggedDays < 30 ? "Live early score: " : "Live score: "
         let message: String
         if score >= 80 {
-            message = "\(prefix)your steps are close to the recommended 90-day rhythm."
+            message = "You are on pace: your average steps and completed goal days are close to the 90-day plan."
         } else if score >= 60 {
-            message = "\(prefix)your steps are partly aligned with the recommended 90-day rhythm."
+            message = "You are close: your average steps or completed goal days need a little more support."
         } else {
-            message = "\(prefix)keep tracking; the score becomes more reliable as more days are read."
+            message = "Needs attention: average steps or completed goal days are below the planned pace. Focus on the next few days."
         }
 
         return (score, scoreStage(score: score, loggedDays: loggedDays), message, Double(score) / 100)
@@ -242,19 +323,18 @@ final class HealthStepTracker: ObservableObject {
 
     private func statusLabel(ratio: Double, loggedDays: Int) -> String {
         guard ratio.isFinite else { return "--" }
-        if loggedDays > 0 && loggedDays < 7 { return "Logging" }
-        if ratio >= 1 { return "On track" }
+        if loggedDays > 0 && loggedDays < 7 { return "Getting started" }
+        if ratio >= 1 { return "On plan" }
         if ratio >= 0.8 { return "Close" }
-        return "Behind"
+        return "Needs attention"
     }
 
     private func scoreStage(score: Int, loggedDays: Int) -> String {
-        if loggedDays == 0 { return "Waiting" }
-        if loggedDays < 7 { return "Starting" }
-        if loggedDays < 30 { return "Early estimate" }
-        if score >= 80 { return "Strong match" }
+        if loggedDays == 0 { return "Not started" }
+        if loggedDays < 7 { return "Getting started" }
+        if score >= 80 { return "On plan" }
         if score >= 60 { return "Close" }
-        return "Building"
+        return "Needs attention"
     }
 
     private func actualQuantile(_ values: [Double], level: Double) -> Double {
@@ -303,9 +383,10 @@ final class HealthStepTracker: ObservableObject {
         let fetched = try await fetchDailySteps(stepType: stepType, start: start, end: end)
         records = fetched
         state = .ready
-        statusMessage = fetched.isEmpty
+        let daysWithSteps = fetched.filter(\.hasData).count
+        statusMessage = daysWithSteps == 0
             ? "Connected to Apple Health. No step data was found for this cycle yet."
-            : "Connected to Apple Health through HealthKit. Read \(fetched.count) day\(fetched.count == 1 ? "" : "s") of steps."
+            : "Connected to Apple Health through HealthKit. Read \(daysWithSteps) day\(daysWithSteps == 1 ? "" : "s") of steps."
     }
 
     private func fetchDailySteps(stepType: HKQuantityType, start: Date, end: Date) async throws -> [DailyStepRecord] {
@@ -333,8 +414,9 @@ final class HealthStepTracker: ObservableObject {
 
                 var output: [DailyStepRecord] = []
                 collection.enumerateStatistics(from: start, to: end) { statistics, _ in
-                    let steps = statistics.sumQuantity()?.doubleValue(for: HKUnit.count()) ?? 0
-                    output.append(DailyStepRecord(date: statistics.startDate, steps: steps))
+                    let quantity = statistics.sumQuantity()
+                    let steps = quantity?.doubleValue(for: HKUnit.count()) ?? 0
+                    output.append(DailyStepRecord(date: statistics.startDate, steps: steps, hasData: quantity != nil))
                 }
                 continuation.resume(returning: output)
             }

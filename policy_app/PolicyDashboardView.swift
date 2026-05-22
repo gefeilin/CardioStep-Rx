@@ -2,8 +2,8 @@ import Charts
 import SwiftUI
 
 enum PolicyChartMode: String, CaseIterable, Identifiable {
-    case density = "Density"
-    case quantile = "Quantile"
+    case density = "Step pattern"
+    case quantile = "Targets"
 
     var id: String { rawValue }
 }
@@ -12,7 +12,7 @@ private enum MobileDashboardTab: String, CaseIterable, Identifiable {
     case plan = "Plan"
     case chart = "Chart"
     case track = "Track"
-    case insight = "Insight"
+    case insight = "About"
     case profile = "Profile"
 
     var id: String { rawValue }
@@ -26,7 +26,7 @@ private enum MobileDashboardTab: String, CaseIterable, Identifiable {
         case .track:
             return "heart.text.square"
         case .insight:
-            return "lightbulb"
+            return "info.circle"
         case .profile:
             return "slider.horizontal.3"
         }
@@ -40,7 +40,7 @@ struct PolicyDashboardView: View {
     @State private var result: PolicyResult
     @State private var chartMode: PolicyChartMode = .density
     @State private var isShowingProfileEditor = false
-    @State private var profileEditorDetent: PresentationDetent = .height(470)
+    @State private var profileEditorDetent: PresentationDetent = .height(560)
     @State private var isInsightExpanded = false
     @State private var selectedDensityStep: Double?
     @State private var selectedQuantileLevel: Double?
@@ -73,10 +73,10 @@ struct PolicyDashboardView: View {
                         mobileContent()
                             .padding(.horizontal, 16)
                             .padding(.top, 10)
-                            .padding(.bottom, 10)
+                            .padding(.bottom, 104)
                     }
                     .safeAreaInset(edge: .bottom) {
-                        MobileDashboardTabBar(selection: activeMobileTab) { tab in
+                        MobileDashboardTabBar(selection: isShowingProfileEditor ? .profile : activeMobileTab) { tab in
                             selectMobileTab(tab)
                         }
                     }
@@ -106,7 +106,7 @@ struct PolicyDashboardView: View {
                         }
                     }
                 }
-                .presentationDetents([.height(470), .large], selection: $profileEditorDetent)
+                .presentationDetents([.height(560), .large], selection: $profileEditorDetent)
                 .presentationDragIndicator(.visible)
             }
         }
@@ -128,8 +128,11 @@ struct PolicyDashboardView: View {
 
             switch activeMobileTab {
             case .plan:
-                SummaryGrid(result: result)
-                WalkingPlanPanel(result: result)
+                MainStepGoalCard(result: result)
+                TodayPlanningGuideCard(guide: stepTracker.todayPlanningGuide(for: result))
+                FlexibleRangeSection(result: result)
+                MissedDayCard()
+                SafetyDisclaimerView()
             case .chart:
                 ChartPanel(
                     engine: engine,
@@ -141,13 +144,11 @@ struct PolicyDashboardView: View {
             case .track:
                 HealthTrackerPanel(engine: engine, result: result, tracker: stepTracker)
             case .insight:
+                WhyThisPlanAboutCard(result: result)
+                ResearchModelCard()
                 InsightPanel(result: result, isExpanded: $isInsightExpanded)
                 SubgroupPanel(result: result)
-                Text("Research use only, not clinical decision making.")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.top, 4)
+                SafetyDisclaimerView()
             case .profile:
                 EmptyView()
             }
@@ -156,7 +157,6 @@ struct PolicyDashboardView: View {
 
     private func selectMobileTab(_ tab: MobileDashboardTab) {
         if tab == .profile {
-            activeMobileTab = .profile
             openProfileEditor()
             return
         }
@@ -169,7 +169,7 @@ struct PolicyDashboardView: View {
     }
 
     private func openProfileEditor() {
-        profileEditorDetent = .height(470)
+        profileEditorDetent = .height(560)
         isShowingProfileEditor = true
     }
 
@@ -182,8 +182,10 @@ struct PolicyDashboardView: View {
     private func resultsColumn(isWide: Bool) -> some View {
         VStack(alignment: .leading, spacing: 12) {
             header(isWide: isWide)
-            SummaryGrid(result: result)
-            WalkingPlanPanel(result: result)
+            MainStepGoalCard(result: result)
+            TodayPlanningGuideCard(guide: stepTracker.todayPlanningGuide(for: result))
+            FlexibleRangeSection(result: result)
+            MissedDayCard()
             HealthTrackerPanel(engine: engine, result: result, tracker: stepTracker)
             ChartPanel(
                 engine: engine,
@@ -192,50 +194,34 @@ struct PolicyDashboardView: View {
                 selectedDensityStep: $selectedDensityStep,
                 selectedQuantileLevel: $selectedQuantileLevel
             )
+            WhyThisPlanAboutCard(result: result)
+            ResearchModelCard()
             InsightPanel(result: result, isExpanded: $isInsightExpanded)
             SubgroupPanel(result: result)
-            Text("Research use only, not clinical decision making.")
-                .font(.footnote)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.top, 4)
+            SafetyDisclaimerView()
         }
         .frame(maxWidth: isWide ? .infinity : nil, alignment: .topLeading)
     }
 
-    private func header(isWide: Bool) -> some View {
+    private func header(isWide: Bool, showsBrand: Bool = true) -> some View {
         HStack(alignment: .top, spacing: 12) {
             VStack(alignment: .leading, spacing: 2) {
-                Text("CardioStepRx")
-                    .font(.caption.weight(.bold))
-                    .foregroundStyle(AppTheme.green)
-                    .lineLimit(1)
-                Text("Precision Physical Activity Prescription")
-                    .font(.system(size: 27, weight: .bold, design: .default))
+                if showsBrand {
+                    Text("CardioStepRx")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(AppTheme.green)
+                        .lineLimit(1)
+                }
+                Text("Your precise 90-day Physical Activity prescription")
+                    .font(.system(size: isWide ? 30 : 25, weight: .bold, design: .default))
                     .foregroundStyle(AppTheme.ink)
                     .lineLimit(2)
                     .minimumScaleFactor(0.72)
                     .accessibilityIdentifier("appTitle")
-                Text("Recommended 90-day distribution of daily steps for cardiometabolic risk")
+                Text("Personalized daily-step guidance for cardiometabolic risk")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(3)
-            }
-            Spacer(minLength: 8)
-            if !isWide {
-                Button {
-                    activeMobileTab = .profile
-                    openProfileEditor()
-                } label: {
-                    Image(systemName: "slider.horizontal.3")
-                        .font(.title3.weight(.semibold))
-                        .foregroundStyle(AppTheme.ink)
-                        .frame(width: 44, height: 44)
-                        .background(Color.white)
-                        .clipShape(Circle())
-                        .overlay(Circle().stroke(AppTheme.line))
-                }
-                .accessibilityLabel("Edit Profile")
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -318,11 +304,11 @@ struct ProfileFormState: Equatable {
 
     func validatedProfile() throws -> PatientProfile {
         PatientProfile(
-            glucose: try optionalNumber(glucose, field: "glucose"),
-            bmi: try requiredNumber(bmi, field: "bmi"),
-            dbp: try requiredNumber(dbp, field: "dbp"),
-            sbp: try requiredNumber(sbp, field: "sbp"),
-            age: try requiredNumber(age, field: "age"),
+            glucose: try optionalNumber(glucose, field: "Glucose"),
+            bmi: try requiredNumber(bmi, field: "BMI"),
+            dbp: try requiredNumber(dbp, field: "DBP"),
+            sbp: try requiredNumber(sbp, field: "SBP"),
+            age: try requiredNumber(age, field: "Age"),
             sex: sex
         )
     }
@@ -378,17 +364,38 @@ private struct ProfileEditorPanel: View {
             }
 
             ProfileSection(title: "Metabolic") {
-                PolicyTextField(title: "Glucose (mg/dL)", text: $form.glucose, placeholder: "Impute")
-                PolicyTextField(title: "BMI (kg/m2)", text: $form.bmi)
+                PolicyTextField(
+                    title: "Glucose",
+                    text: $form.glucose,
+                    placeholder: "Impute",
+                    helper: "Fasting preferred, mg/dL"
+                )
+                PolicyTextField(
+                    title: "BMI",
+                    text: $form.bmi,
+                    helper: "kg/m2"
+                )
             }
 
             ProfileSection(title: "Blood Pressure") {
-                PolicyTextField(title: "DBP (mmHg)", text: $form.dbp)
-                PolicyTextField(title: "SBP (mmHg)", text: $form.sbp)
+                PolicyTextField(
+                    title: "DBP",
+                    text: $form.dbp,
+                    helper: "Bottom number, mmHg"
+                )
+                PolicyTextField(
+                    title: "SBP",
+                    text: $form.sbp,
+                    helper: "Top number, mmHg"
+                )
             }
 
             ProfileSection(title: "Demographics") {
-                PolicyTextField(title: "Age (years)", text: $form.age)
+                PolicyTextField(
+                    title: "Age",
+                    text: $form.age,
+                    helper: "Years"
+                )
                 VStack(alignment: .leading, spacing: 7) {
                     Text("Sex at birth")
                         .font(.caption.weight(.semibold))
@@ -399,7 +406,11 @@ private struct ProfileEditorPanel: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                    Text("Years")
+                        .font(.caption2)
+                        .hidden()
                 }
+                .frame(maxWidth: .infinity, alignment: .topLeading)
             }
 
             if let errorMessage {
@@ -413,20 +424,22 @@ private struct ProfileEditorPanel: View {
                 Button {
                     reset()
                 } label: {
-                    Label("Reset", systemImage: "arrow.counterclockwise")
+                    Label("Reset example", systemImage: "arrow.counterclockwise")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.bordered)
+                .accessibilityIdentifier("resetExampleButton")
 
                 Button {
                     generate()
                 } label: {
-                    Label("Generate", systemImage: "waveform.path.ecg")
+                    Label("Generate Plan", systemImage: "waveform.path.ecg")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(AppTheme.green)
                 .accessibilityIdentifier("generatePolicyButton")
+                .accessibilityLabel("Generate 90-day plan")
             }
         }
     }
@@ -469,6 +482,7 @@ private struct PolicyTextField: View {
     let title: String
     @Binding var text: String
     var placeholder: String = ""
+    var helper: String?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
@@ -487,7 +501,16 @@ private struct PolicyTextField: View {
                     RoundedRectangle(cornerRadius: 8, style: .continuous)
                         .stroke(AppTheme.line)
                 )
+            if let helper {
+                Text(helper)
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(2)
+                    .minimumScaleFactor(0.78)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
     }
 }
 
@@ -526,11 +549,11 @@ private enum HelpTopic: String, Identifiable {
         case .glucoseMeasured:
             return "Glucose"
         case .densityFunction:
-            return "Density function"
+            return "Step pattern"
         case .quantileFunction:
-            return "Quantile function"
+            return "Low-to-high targets"
         case .subgroupAverage:
-            return "Subgroup average"
+            return "Similar profiles"
         case .healthTracker:
             return "Health step tracker"
         }
@@ -555,11 +578,11 @@ private enum HelpTopic: String, Identifiable {
         case .glucoseMeasured:
             return "The glucose value entered in the profile and used by the recommendation model."
         case .densityFunction:
-            return "This curve shows which daily step levels are more or less likely in the recommended 90-day plan. Taller parts mean more days near that step level."
+            return "This advanced curve shows which daily step levels appear more often in the recommended 90-day plan. Taller parts mean more days near that step level."
         case .quantileFunction:
-            return "This curve maps a percentile of days to a daily step level. For example, lower percentiles represent lower-activity days."
+            return "This advanced curve shows the daily step target from lower-activity days to more active days."
         case .subgroupAverage:
-            return "The gray curve averages recommendations for similar profiles with the same glucose, age, BMI, blood pressure, sex, and glucose-source group."
+            return "The gray curve summarizes recommendations for profiles with similar glucose, age, BMI, blood pressure, sex, and glucose-source group."
         case .healthTracker:
             return "The iOS app can request HealthKit permission to read Apple Health step counts for the selected 90-day cycle. The data stays on this device."
         }
@@ -731,6 +754,252 @@ private struct CompactMetricChip: View {
     }
 }
 
+private struct MainStepGoalCard: View {
+    let result: PolicyResult
+    @State private var activeHelp: HelpTopic?
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            HStack(alignment: .top, spacing: 10) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Your main goal")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(.white.opacity(0.92))
+                    Text("Aim for this average across the next 90 days.")
+                        .font(.subheadline)
+                        .foregroundStyle(.white.opacity(0.78))
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                Spacer(minLength: 8)
+                HelpButton(color: .white.opacity(0.86)) {
+                    activeHelp = .averageDailySteps
+                }
+            }
+
+            HStack(alignment: .firstTextBaseline, spacing: 7) {
+                Text("≈ \(result.meanRounded)")
+                    .font(.system(size: 42, weight: .bold))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                Text("steps/day")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(.white.opacity(0.80))
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
+            }
+            .foregroundStyle(.white)
+
+            Text("You do not need to hit the same number every day.")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(.white.opacity(0.86))
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.green)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Main goal. Aim for about \(result.meanRounded) steps per day on average across the next 90 days.")
+        .alert(item: $activeHelp) { topic in
+            Alert(
+                title: Text(topic.title),
+                message: Text(topic.message),
+                dismissButton: .default(Text("Got it"))
+            )
+        }
+    }
+}
+
+private struct TodayPlanningGuideCard: View {
+    let guide: TodayPlanningGuide
+
+    var body: some View {
+        ActionInfoCard(
+            icon: "figure.walk",
+            title: "Today's planning guide",
+            headline: "\(guide.title): \(guide.rangeText)",
+            detail: guide.detail
+        )
+    }
+}
+
+private struct FlexibleRangeSection: View {
+    let result: PolicyResult
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 14) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text("Your flexible range")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(AppTheme.ink)
+                Text("Use these targets to vary lighter, regular, and more active days.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            VStack(spacing: 10) {
+                FlexibleRangeRow(
+                    icon: "leaf",
+                    title: "Easy-day goal",
+                    steps: result.q33Rounded,
+                    detail: "On about 60 days, aim for at least"
+                )
+                FlexibleRangeRow(
+                    icon: "calendar",
+                    title: "Regular-day goal",
+                    steps: result.q50Rounded,
+                    detail: "On about 45 days, aim for at least"
+                )
+                FlexibleRangeRow(
+                    icon: "figure.walk.motion",
+                    title: "Active-day goal",
+                    steps: result.q67Rounded,
+                    detail: "On about 30 days, aim for at least"
+                )
+            }
+        }
+        .cardStyle()
+        .accessibilityIdentifier("flexibleRange")
+    }
+}
+
+private struct FlexibleRangeRow: View {
+    let icon: String
+    let title: String
+    let steps: String
+    let detail: String
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            Image(systemName: icon)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(AppTheme.green)
+                .frame(width: 30, height: 30)
+                .background(AppTheme.green.opacity(0.10))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 3) {
+                Text(title)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(AppTheme.ink)
+                Text(detail)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+
+            Spacer(minLength: 8)
+
+            VStack(alignment: .trailing, spacing: 2) {
+                Text("≈ \(steps)")
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(AppTheme.ink)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.72)
+                Text("steps")
+                    .font(.caption2.weight(.semibold))
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(11)
+        .background(AppTheme.background)
+        .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct MissedDayCard: View {
+    var body: some View {
+        ActionInfoCard(
+            icon: "heart",
+            title: "If you miss a day",
+            headline: "That is okay.",
+            detail: "This is a flexible 90-day distribution of recommended steps, not a perfect same-step daily goal."
+        )
+    }
+}
+
+private struct WhyThisPlanAboutCard: View {
+    let result: PolicyResult
+
+    var body: some View {
+        let glucoseSource = result.glucoseImputed ? "estimated glucose" : "measured glucose"
+
+        ActionInfoCard(
+            icon: "person.text.rectangle",
+            title: "Why this plan?",
+            headline: "Based on your health profile.",
+            detail: "The recommendation uses age, sex, BMI, blood pressure, and \(glucoseSource)."
+        )
+    }
+}
+
+private struct ResearchModelCard: View {
+    var body: some View {
+        ActionInfoCard(
+            icon: "point.3.connected.trianglepath.dotted",
+            title: "Research model",
+            headline: "Offline reinforcement learning.",
+            detail: "The model learns functional actions that represent a 90-day distribution of daily steps."
+        )
+    }
+}
+
+private struct SafetyDisclaimerView: View {
+    var body: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Label("Research prototype only", systemImage: "exclamationmark.shield")
+                .font(.caption.weight(.bold))
+                .foregroundStyle(AppTheme.ink)
+            Text("Not intended for clinical decision making.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+            Text("Stop exercising and seek medical advice if you experience chest pain, dizziness, unusual shortness of breath, or severe discomfort.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .cardStyle()
+        .accessibilityElement(children: .combine)
+    }
+}
+
+private struct ActionInfoCard: View {
+    let icon: String
+    let title: String
+    let headline: String
+    let detail: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: icon)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(AppTheme.green)
+                .frame(width: 34, height: 34)
+                .background(AppTheme.green.opacity(0.10))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 5) {
+                Text(title)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(.secondary)
+                Text(headline)
+                    .font(.headline.weight(.bold))
+                    .foregroundStyle(AppTheme.ink)
+                    .fixedSize(horizontal: false, vertical: true)
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .cardStyle()
+        .accessibilityElement(children: .combine)
+    }
+}
+
 private struct WalkingPlanPanel: View {
     let result: PolicyResult
     @State private var activeHelp: HelpTopic?
@@ -853,7 +1122,7 @@ private struct HealthTrackerPanel: View {
     }
 
     var body: some View {
-        let metrics = metrics
+        let trackerMetrics = metrics
 
         VStack(alignment: .leading, spacing: 14) {
             HStack(alignment: .top, spacing: 10) {
@@ -861,10 +1130,6 @@ private struct HealthTrackerPanel: View {
                     Text("Health 90-day tracker")
                         .font(.headline.weight(.bold))
                         .foregroundStyle(AppTheme.ink)
-                    Text("Our iOS app can connect through HealthKit to read daily steps from Apple Health after permission is granted.")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
                 }
                 Spacer(minLength: 8)
                 HelpButton(color: AppTheme.green) {
@@ -914,15 +1179,16 @@ private struct HealthTrackerPanel: View {
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
 
-            TrackerScoreCard(metrics: metrics)
-            TrackerAverageGrid(metrics: metrics)
+            TrackerScoreCard(metrics: trackerMetrics)
+            TrackerAverageGrid(metrics: trackerMetrics)
 
             VStack(spacing: 10) {
-                ForEach(metrics.goals) { goal in
+                ForEach(trackerMetrics.goals) { goal in
                     TrackerGoalRow(goal: goal)
                 }
             }
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
         .cardStyle()
         .accessibilityIdentifier("healthTracker")
         .onChange(of: tracker.cycleStartDate) { _, _ in
@@ -1033,13 +1299,13 @@ private struct ScoreScale: View {
             .frame(height: 16)
 
             HStack(alignment: .top) {
-                Text("Collecting data")
+                Text("Start")
                 Spacer()
-                Text("Building rhythm")
+                Text("Needs attention")
                 Spacer()
-                Text("Close to plan")
+                Text("Close")
                 Spacer()
-                Text("Strong match")
+                Text("On plan")
                     .multilineTextAlignment(.trailing)
             }
             .font(.caption2.weight(.semibold))
@@ -1052,43 +1318,73 @@ private struct TrackerAverageGrid: View {
     let metrics: StepTrackerMetrics
 
     var body: some View {
-        HStack(alignment: .top, spacing: 10) {
+        VStack(spacing: 10) {
             TrackerStatTile(title: "Current cycle", value: metrics.currentCycleLabel)
                 .frame(maxWidth: .infinity)
 
-            VStack(alignment: .leading, spacing: 6) {
-                Text("90-day average progress")
-                    .font(.caption2.weight(.bold))
-                    .foregroundStyle(.secondary)
-                HStack(spacing: 10) {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("So far")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.secondary)
-                        Text(metrics.averageSoFar)
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(AppTheme.ink)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                    }
-                    Divider()
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("Needed next")
-                            .font(.caption2.weight(.bold))
-                            .foregroundStyle(.secondary)
-                        Text(metrics.neededNext)
-                            .font(.headline.weight(.bold))
-                            .foregroundStyle(AppTheme.ink)
-                            .lineLimit(1)
-                            .minimumScaleFactor(0.75)
-                    }
-                }
-            }
-            .padding(10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(AppTheme.background)
-            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            averageProgressCard
+            dataCheckCard
         }
+        .frame(maxWidth: .infinity, alignment: .leading)
+    }
+
+    private var averageProgressCard: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Text("90-day average progress")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 10) {
+                trackerValueColumn(title: "So far", value: metrics.averageSoFar)
+                Divider()
+                trackerValueColumn(title: "Needed next", value: metrics.neededNext)
+            }
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.background)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private var dataCheckCard: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Data check")
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 10) {
+                trackerValueColumn(title: "Below 100", value: metrics.lowStepDays)
+                Divider()
+                trackerValueColumn(title: "Above 22,300", value: metrics.highStepDays)
+                Divider()
+                trackerValueColumn(title: "Missing days", value: metrics.missingStepDays)
+            }
+
+            Text(metrics.dataCheckNote)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
+        }
+        .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(AppTheme.background)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+    }
+
+    private func trackerValueColumn(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text(title)
+                .font(.caption2.weight(.bold))
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.78)
+            Text(value)
+                .font(.headline.weight(.bold))
+                .foregroundStyle(AppTheme.ink)
+                .lineLimit(1)
+                .minimumScaleFactor(0.75)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
     }
 }
 
@@ -1108,6 +1404,7 @@ private struct TrackerStatTile: View {
                 .minimumScaleFactor(0.78)
         }
         .padding(10)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(AppTheme.background)
         .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
@@ -1133,6 +1430,9 @@ private struct TrackerGoalRow: View {
             Text(goal.status)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(AppTheme.green)
+                .lineLimit(2)
+                .multilineTextAlignment(.center)
+                .minimumScaleFactor(0.82)
                 .padding(.horizontal, 10)
                 .padding(.vertical, 7)
                 .background(AppTheme.green.opacity(0.10))
@@ -1156,13 +1456,13 @@ private struct ChartPanel: View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
                 VStack(alignment: .leading, spacing: 3) {
-                    Text("Recommended")
+                    Text("Advanced details")
                         .font(.subheadline.weight(.bold))
                         .foregroundStyle(AppTheme.ink)
                         .lineLimit(2)
                         .minimumScaleFactor(0.82)
                         .fixedSize(horizontal: false, vertical: true)
-                    Text(mode == .density ? "Density function of daily steps" : "Quantile function of daily steps")
+                    Text(mode == .density ? "Step pattern across the 90-day plan" : "Low-to-high daily step targets")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }
@@ -1222,9 +1522,9 @@ private struct ChartLegendRow: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
             HStack(spacing: 14) {
-                ChartLegendItem(label: "Individual policy", color: primaryColor, style: .solidLine)
+                ChartLegendItem(label: "Your plan", color: primaryColor, style: .solidLine)
                 HStack(spacing: 4) {
-                    ChartLegendItem(label: "Subgroup average", color: AppTheme.reference, style: .dashedLine)
+                    ChartLegendItem(label: "Similar profiles", color: AppTheme.reference, style: .dashedLine)
                     HelpButton(color: AppTheme.reference) {
                         activeHelp = .subgroupAverage
                     }
@@ -1241,11 +1541,11 @@ private struct ChartLegendRow: View {
     }
 
     private var redMarkerLabel: String {
-        mode == .density ? "Most frequent" : "Q0.33"
+        mode == .density ? "Most common" : "Easy target"
     }
 
     private var blueMarkerLabel: String {
-        mode == .density ? "90-day average" : "Q0.67"
+        mode == .density ? "90-day average" : "Active target"
     }
 }
 
@@ -1411,7 +1711,7 @@ private struct DensityChart: View {
             AxisMarks(position: .trailing, values: .automatic(desiredCount: 3))
         }
         .chartXAxisLabel("Daily steps (100-22.3k)")
-        .chartYAxisLabel("Density")
+        .chartYAxisLabel("Relative frequency")
         .chartOverlay { proxy in
             GeometryReader { geometry in
                 Rectangle()
@@ -1476,7 +1776,7 @@ private struct DensityChart: View {
                 kind: .peak,
                 step: peak.step,
                 density: peak.density,
-                label: "Most frequent ≈ \(formatHundred(peak.step)) steps"
+                label: "Most common ≈ \(formatHundred(peak.step)) steps"
             )
         }
 
@@ -1546,7 +1846,7 @@ private struct QuantileChart: View {
                 RuleMark(x: .value("Selected quantile", selection.level))
                     .foregroundStyle(AppTheme.ink.opacity(0.28))
                     .annotation(position: .top, alignment: annotationAlignment(for: selection.level)) {
-                        ChartLabel(text: "Q \(String(format: "%.2f", selection.level))", color: AppTheme.ink)
+                        ChartLabel(text: "Level \(String(format: "%.2f", selection.level))", color: AppTheme.ink)
                 }
             }
         }
@@ -1568,7 +1868,7 @@ private struct QuantileChart: View {
                 }
             }
         }
-        .chartXAxisLabel("Quantile level")
+        .chartXAxisLabel("Low-to-high days")
         .chartYAxisLabel("Daily steps")
         .chartOverlay { proxy in
             GeometryReader { geometry in
@@ -1610,7 +1910,7 @@ private struct QuantileChart: View {
                 id: "q33",
                 level: 0.33,
                 steps: result.q33,
-                label: "Q0.33 ≈ \(result.q33Rounded)",
+                label: "Easy target ≈ \(result.q33Rounded)",
                 color: AppTheme.red,
                 annotationPosition: .bottom
             ),
@@ -1618,7 +1918,7 @@ private struct QuantileChart: View {
                 id: "q67",
                 level: 0.67,
                 steps: result.q67,
-                label: "Q0.67 ≈ \(result.q67Rounded)",
+                label: "Active target ≈ \(result.q67Rounded)",
                 color: AppTheme.blue,
                 annotationPosition: .top
             )
@@ -1714,10 +2014,10 @@ private struct InsightPanel: View {
             } label: {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("Insight")
+                        Text("Using the plan")
                             .font(.headline.weight(.bold))
                             .foregroundStyle(AppTheme.ink)
-                        Text("The plan translates the density and quantile curves into flexible 90-day step goals.")
+                        Text("A plain-language explanation of how to use this 90-day plan.")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
                             .multilineTextAlignment(.leading)
@@ -1728,24 +2028,19 @@ private struct InsightPanel: View {
                 }
             }
             .buttonStyle(.plain)
-            .accessibilityLabel("Insight")
+            .accessibilityLabel("Using the plan")
 
             if isExpanded {
                 VStack(alignment: .leading, spacing: 10) {
                     InsightItem(
                         icon: "target",
-                        title: "Primary step goal",
-                        detail: "The primary goal comes from the strongest point of the density curve, not from a one-day maximum."
+                        title: "Main goal",
+                        detail: "Use the average daily steps as the main target across the full 90 days."
                     )
                     InsightItem(
-                        icon: "chart.xyaxis.line",
-                        title: "Day-count goals",
-                        detail: "The 60-, 45-, and 30-day goals come from the 33rd, 50th, and 67th percentiles of the recommended 90-day distribution."
-                    )
-                    InsightItem(
-                        icon: "slider.horizontal.3",
-                        title: "Flexible range",
-                        detail: "The days do not need to look identical; the recommendation is about the overall 90-day rhythm."
+                        icon: "calendar",
+                        title: "Flexible days",
+                        detail: "Some days can be lighter and some can be more active; the plan is not a strict daily minimum."
                     )
                 }
             }
@@ -1816,6 +2111,11 @@ private struct SubgroupPanel: View {
                 }
                 Spacer()
             }
+
+            Text("Your plan is compared with people in a similar cardiometabolic profile group.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .fixedSize(horizontal: false, vertical: true)
 
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 8) {
                 SubgroupPill(label: "Glucose", value: compactBucketLabel(result.subgroup.glucose, removing: ["glucose"]))

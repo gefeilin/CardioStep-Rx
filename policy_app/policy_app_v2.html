@@ -214,6 +214,107 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       line-height: 1.3;
     }
 
+    .main-goal-card {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .main-goal-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .main-goal-card h2 {
+      color: #fff;
+      font-size: 18px;
+      line-height: 1.15;
+    }
+
+    .main-goal-card p {
+      margin-top: 5px;
+      color: rgba(255, 255, 255, 0.78);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
+    .main-goal-value {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      color: #fff;
+      min-width: 0;
+    }
+
+    .main-goal-value strong {
+      font-size: 42px;
+      line-height: 0.98;
+      font-weight: 800;
+      letter-spacing: 0;
+      white-space: nowrap;
+    }
+
+    .main-goal-value span {
+      color: rgba(255, 255, 255, 0.82);
+      font-size: 17px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .main-goal-card .help-button {
+      color: rgba(255, 255, 255, 0.86);
+    }
+
+    .action-card {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .action-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 34px;
+      height: 34px;
+      border-radius: 999px;
+      background: rgba(0, 131, 172, 0.10);
+      color: var(--accent);
+    }
+
+    .action-icon .sf-symbol {
+      width: 18px;
+      height: 18px;
+      stroke-width: 2.15;
+    }
+
+    .action-kicker {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+
+    .action-headline {
+      margin-top: 5px;
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.25;
+      font-weight: 800;
+    }
+
+    .action-detail {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+    }
+
     .sheet-handle { display: none; }
 
     form {
@@ -370,12 +471,6 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       width: 19px;
       height: 19px;
       stroke-width: 2.2;
-    }
-
-    .edit-profile-button .sf-symbol {
-      width: 22px;
-      height: 22px;
-      stroke-width: 2.35;
     }
 
     .button-content {
@@ -581,6 +676,35 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       line-height: 1.35;
     }
 
+    .range-item {
+      grid-template-columns: 30px minmax(0, 1fr) auto;
+      align-items: center;
+      padding: 11px;
+    }
+
+    .range-item .plan-icon {
+      width: 30px;
+      height: 30px;
+    }
+
+    .range-step-value {
+      color: var(--ink);
+      font-size: 17px;
+      line-height: 1.05;
+      font-weight: 800;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .range-step-unit {
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.1;
+      font-weight: 700;
+      text-align: right;
+    }
+
     .track-panel {
       display: grid;
       gap: 14px;
@@ -781,7 +905,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     }
 
     .track-stat-grid {
-      grid-template-columns: 0.75fr 1.25fr;
+      grid-template-columns: 1fr;
     }
 
     .track-stat,
@@ -801,6 +925,25 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .track-average-pair > div + div {
       border-left: 1px solid var(--line);
       padding-left: 10px;
+    }
+
+    .data-check-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-top: 8px;
+    }
+
+    .data-check-grid > div + div {
+      border-left: 1px solid var(--line);
+      padding-left: 10px;
+    }
+
+    .stat-note {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
     }
 
     .track-stat .stat-label,
@@ -1168,10 +1311,6 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         line-height: 1.34;
       }
 
-      .edit-profile-button {
-        display: none;
-      }
-
       .layout {
         display: block;
       }
@@ -1182,14 +1321,14 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 
       .profile-panel {
         position: fixed;
-        top: auto;
+        top: 18vh;
         left: 12px;
         right: 12px;
         bottom: max(14px, env(safe-area-inset-bottom));
+        bottom: 82px;
         bottom: calc(82px + env(safe-area-inset-bottom));
         z-index: 30;
-        max-height: min(60vh, 480px);
-        max-height: min(60dvh, 480px);
+        max-height: none;
         overflow: auto;
         padding: 14px 16px 16px;
         border-bottom: 1px solid var(--line);
@@ -1289,10 +1428,6 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       }
     }
 
-    @media (min-width: 820px) {
-      .edit-profile-button { display: none; }
-    }
-
     @media (max-width: 420px) {
       main {
         padding-left: 16px;
@@ -1306,6 +1441,10 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 
       .hero-value {
         font-size: 21px;
+      }
+
+      .main-goal-value strong {
+        font-size: 36px;
       }
 
       .metric-chip {
@@ -1328,6 +1467,29 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     <circle cx="12" cy="12" r="9"></circle>
     <path d="M9.7 9a2.5 2.5 0 0 1 4.6 1.4c0 1.7-2.3 1.8-2.3 3.5"></path>
     <path d="M12 17.3h.01"></path>
+  </symbol>
+  <symbol id="icon-info" viewBox="0 0 24 24">
+    <circle cx="12" cy="12" r="9"></circle>
+    <path d="M12 10.5v6"></path>
+    <path d="M12 7.4h.01"></path>
+  </symbol>
+  <symbol id="icon-heart" viewBox="0 0 24 24">
+    <path d="M12 20s-7.5-4.8-8.7-10A4.4 4.4 0 0 1 11 6.1L12 7.2l1-1.1A4.4 4.4 0 0 1 20.7 10C19.5 15.2 12 20 12 20z"></path>
+  </symbol>
+  <symbol id="icon-person" viewBox="0 0 24 24">
+    <circle cx="9" cy="8" r="3.2"></circle>
+    <path d="M3.8 19a5.2 5.2 0 0 1 10.4 0"></path>
+    <rect x="14.5" y="6" width="5.5" height="9" rx="1.6"></rect>
+    <path d="M16 9h2.5"></path>
+    <path d="M16 12h2.5"></path>
+  </symbol>
+  <symbol id="icon-nodes" viewBox="0 0 24 24">
+    <circle cx="7" cy="7" r="2.4"></circle>
+    <circle cx="17" cy="8" r="2.4"></circle>
+    <circle cx="12" cy="17" r="2.4"></circle>
+    <path d="M9.2 7.4l5.4.5"></path>
+    <path d="M8.4 9.1l2.5 5.7"></path>
+    <path d="M15.7 10l-2.5 4.9"></path>
   </symbol>
   <symbol id="icon-calendar" viewBox="0 0 24 24">
     <rect x="4" y="5" width="16" height="15" rx="2.4"></rect>
@@ -1398,13 +1560,10 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
   <header class="app-header">
     <div>
       <p class="eyebrow">CardioStepRx</p>
-      <h1>Precision Physical Activity Prescription</h1>
-      <p class="subhead">Recommended 90-day distribution of daily steps for cardiometabolic risk</p>
+      <h1>Your precise 90-day Physical Activity prescription</h1>
+      <p class="subhead">Personalized daily-step guidance for cardiometabolic risk</p>
     </div>
-    <button class="icon-button edit-profile-button" id="open-profile" type="button" aria-label="Edit Profile">
-      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-sliders"></use></svg>
-    </button>
-  </header>
+	  </header>
 
   <div class="layout">
     <section class="profile-panel" id="profile-panel" aria-label="Profile inputs">
@@ -1475,13 +1634,13 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
           <button class="secondary-button" type="button" id="reset">
             <span class="button-content">
               <svg class="sf-symbol button-icon" aria-hidden="true"><use href="#icon-reset"></use></svg>
-              <span>Reset</span>
+              <span>Reset example</span>
             </span>
           </button>
           <button class="primary-button" type="submit">
             <span class="button-content">
               <svg class="sf-symbol button-icon" aria-hidden="true"><use href="#icon-waveform"></use></svg>
-              <span>Generate</span>
+              <span>Generate Plan</span>
             </span>
           </button>
         </div>
@@ -1491,89 +1650,39 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     <section class="results-section" aria-label="Policy results">
       <div id="error" class="error"></div>
 
-      <section class="summary-stack" aria-label="Recommendation summary" data-tab-panel="plan">
-        <div class="hero-summary">
-          <div class="hero-metric">
-            <div class="metric-label-row">
-              <span class="metric-icon" aria-hidden="true">
-                <svg class="sf-symbol"><use href="#icon-calendar"></use></svg>
-              </span>
-              <span>90-day average</span>
-              <button class="help-button" type="button" data-help="averageDailySteps" aria-label="What does 90-day average mean?">
-                <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
-              </button>
-            </div>
-            <div class="hero-value" id="mean-steps">-</div>
+      <section class="main-goal-card" aria-label="Main 90-day step goal" data-tab-panel="plan">
+        <div class="main-goal-header">
+          <div>
+            <h2>Your main goal</h2>
+            <p>Aim for this average across the next 90 days.</p>
           </div>
-          <div class="hero-divider" aria-hidden="true"></div>
-          <div class="hero-metric">
-            <div class="metric-label-row">
-              <span class="metric-icon" aria-hidden="true">
-                <svg class="sf-symbol"><use href="#icon-chart-up"></use></svg>
-              </span>
-              <span>Most frequent</span>
-              <button class="help-button" type="button" data-help="mostFrequentLevel" aria-label="What does most frequent mean?">
-                <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
-              </button>
-            </div>
-            <div class="hero-value" id="peak-steps">-</div>
-          </div>
+          <button class="help-button" type="button" data-help="averageDailySteps" aria-label="What does 90-day average mean?">
+            <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
+          </button>
         </div>
+        <div class="main-goal-value">
+          <strong id="mean-steps">-</strong>
+          <span>steps/day</span>
+        </div>
+        <p>You do not need to hit the same number every day.</p>
+      </section>
 
-        <div class="metric-chip-grid">
-          <div class="metric-chip">
-            <div class="metric-label-row">
-              <span class="metric-icon" aria-hidden="true">
-                <svg class="sf-symbol"><use href="#icon-arrow-down-left"></use></svg>
-              </span>
-              <span>Low day</span>
-              <button class="help-button" type="button" data-help="lowActivityDay" aria-label="What does low day mean?">
-                <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
-              </button>
-            </div>
-            <div class="metric-value-row">
-              <span class="chip-value" id="q33-steps">-</span>
-            </div>
-          </div>
-
-          <div class="metric-chip">
-            <div class="metric-label-row">
-              <span class="metric-icon" aria-hidden="true">
-                <svg class="sf-symbol"><use href="#icon-arrow-up-right"></use></svg>
-              </span>
-              <span>High day</span>
-              <button class="help-button" type="button" data-help="highActivityDay" aria-label="What does high day mean?">
-                <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
-              </button>
-            </div>
-            <div class="metric-value-row">
-              <span class="chip-value" id="q67-steps">-</span>
-            </div>
-          </div>
-
-          <div class="metric-chip">
-            <div class="metric-label-row">
-              <span class="metric-icon" aria-hidden="true">
-                <svg class="sf-symbol fill"><use href="#icon-drop"></use></svg>
-              </span>
-              <span id="glucose-card-label">Glucose</span>
-              <button class="help-button" type="button" id="glucose-help" data-help="glucoseMeasured" aria-label="What does glucose mean?">
-                <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
-              </button>
-            </div>
-            <div class="metric-value-row">
-              <span class="chip-value" id="glucose-used">-</span>
-              <span class="chip-unit">mg/dL</span>
-            </div>
-          </div>
+      <section class="action-card card" aria-label="Today's planning guide" data-tab-panel="plan">
+        <span class="action-icon" aria-hidden="true">
+          <svg class="sf-symbol"><use href="#icon-waveform"></use></svg>
+        </span>
+        <div>
+          <div class="action-kicker">Today's planning guide</div>
+          <div class="action-headline" id="today-guide-headline">-</div>
+          <div class="action-detail" id="today-guide-detail">-</div>
         </div>
       </section>
 
-      <section class="walking-plan card" aria-label="90-day walking plan" data-tab-panel="plan">
+      <section class="walking-plan card" aria-label="Flexible 90-day range" data-tab-panel="plan">
         <div class="panel-title-row">
           <div>
-            <h2>Your 90-day walking plan</h2>
-            <p class="plan-intro">Use the primary step goal as your everyday anchor, while allowing easier and more active days across the 90 days.</p>
+            <h2>Your flexible range</h2>
+            <p class="plan-intro">Use these targets to vary lighter, regular, and more active days.</p>
           </div>
           <button class="help-button" type="button" data-help="walkingPlan" aria-label="What does the 90-day walking plan mean?">
             <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
@@ -1581,60 +1690,69 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         </div>
 
         <div class="walking-plan-list">
-          <div class="plan-item primary">
+          <div class="plan-item range-item">
             <span class="plan-icon" aria-hidden="true">
-              <svg class="sf-symbol"><use href="#icon-target"></use></svg>
+              <svg class="sf-symbol"><use href="#icon-arrow-down-left"></use></svg>
             </span>
             <div>
-              <div class="plan-label-row">
-                <span>Primary step goal</span>
-                <button class="help-button" type="button" data-help="primaryStepGoal" aria-label="What does primary step goal mean?">
-                  <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
-                </button>
-              </div>
-              <p id="plan-primary">-</p>
+              <div class="plan-label-row"><span>Easy-day goal</span></div>
+              <p>On about 60 days, aim for at least</p>
+            </div>
+            <div>
+              <div class="range-step-value" id="plan-usual">-</div>
+              <div class="range-step-unit">steps</div>
             </div>
           </div>
 
-          <div class="plan-item">
+          <div class="plan-item range-item">
             <span class="plan-icon" aria-hidden="true">
               <svg class="sf-symbol"><use href="#icon-calendar"></use></svg>
             </span>
             <div>
-              <div class="plan-label-row"><span>Usual days</span></div>
-              <p id="plan-usual">-</p>
+              <div class="plan-label-row"><span>Regular-day goal</span></div>
+              <p>On about 45 days, aim for at least</p>
+            </div>
+            <div>
+              <div class="range-step-value" id="plan-middle">-</div>
+              <div class="range-step-unit">steps</div>
             </div>
           </div>
 
-          <div class="plan-item">
+          <div class="plan-item range-item">
             <span class="plan-icon" aria-hidden="true">
               <svg class="sf-symbol"><use href="#icon-chart-up"></use></svg>
             </span>
             <div>
-              <div class="plan-label-row"><span>Middle days</span></div>
-              <p id="plan-middle">-</p>
+              <div class="plan-label-row"><span>Active-day goal</span></div>
+              <p>On about 30 days, aim for at least</p>
             </div>
-          </div>
-
-          <div class="plan-item">
-            <span class="plan-icon" aria-hidden="true">
-              <svg class="sf-symbol"><use href="#icon-arrow-up-right"></use></svg>
-            </span>
             <div>
-              <div class="plan-label-row"><span>More active days</span></div>
-              <p id="plan-active">-</p>
+              <div class="range-step-value" id="plan-active">-</div>
+              <div class="range-step-unit">steps</div>
             </div>
           </div>
+        </div>
+      </section>
 
-          <div class="plan-item">
-            <span class="plan-icon" aria-hidden="true">
-              <svg class="sf-symbol"><use href="#icon-waveform"></use></svg>
-            </span>
-            <div>
-              <div class="plan-label-row"><span>Average rhythm</span></div>
-              <p id="plan-average">-</p>
-            </div>
-          </div>
+      <section class="action-card card" aria-label="Missed day explanation" data-tab-panel="plan">
+        <span class="action-icon" aria-hidden="true">
+          <svg class="sf-symbol"><use href="#icon-heart"></use></svg>
+        </span>
+        <div>
+          <div class="action-kicker">If you miss a day</div>
+          <div class="action-headline">That is okay.</div>
+          <div class="action-detail">This is a flexible 90-day distribution of recommended steps, not a perfect same-step daily goal.</div>
+        </div>
+      </section>
+
+      <section class="action-card card" aria-label="Research and safety note" data-tab-panel="plan">
+        <span class="action-icon" aria-hidden="true">
+          <svg class="sf-symbol"><use href="#icon-info"></use></svg>
+        </span>
+        <div>
+          <div class="action-kicker">Research prototype only</div>
+          <div class="action-headline">Not intended for clinical decision making.</div>
+          <div class="action-detail">Stop exercising and seek medical advice if you experience chest pain, dizziness, unusual shortness of breath, or severe discomfort.</div>
         </div>
       </section>
 
@@ -1642,7 +1760,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         <div class="panel-title-row">
           <div>
             <h2>Manual 90-day tracker</h2>
-            <p class="track-note">Enter daily steps manually. The web version does not have permission to read Apple Health; our iOS app can connect through HealthKit.</p>
+            <p class="track-note">Enter daily steps manually. This web version stores entries in this browser and does not connect to Apple Health.</p>
           </div>
           <button class="help-button" type="button" data-help="manualTracker" aria-label="What does manual tracker mean?">
             <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
@@ -1653,21 +1771,21 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
           <div class="score-row">
             <div>
               <div class="score-label">Plan match score</div>
-              <div class="score-copy" id="track-score-copy">Updates as you enter steps. Early scores are softened until more days are logged.</div>
+              <div class="score-copy" id="track-score-copy">Shows how closely your logged steps are following the 90-day plan.</div>
             </div>
             <div class="score-value-group">
               <div class="score-value" id="track-score">--</div>
-              <div class="score-stage" id="track-score-stage">Collecting</div>
+              <div class="score-stage" id="track-score-stage">Not started</div>
             </div>
           </div>
           <div class="score-meter" aria-hidden="true">
             <div class="score-marker" id="track-score-marker"></div>
             <div class="score-bar"><span id="track-score-bar"></span></div>
             <div class="score-scale">
-              <span>Collecting data</span>
-              <span>Building rhythm</span>
-              <span>Close to plan</span>
-              <span>Strong match</span>
+              <span>Start</span>
+              <span>Needs attention</span>
+              <span>Close</span>
+              <span>On plan</span>
             </div>
           </div>
         </div>
@@ -1718,32 +1836,50 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
               </div>
             </div>
           </div>
+          <div class="track-stat">
+            <div class="stat-label">Data check</div>
+            <div class="data-check-grid" aria-label="Step data quality check">
+              <div>
+                <div class="stat-label">Below 100</div>
+                <div class="stat-value" id="track-low-step-days">--</div>
+              </div>
+              <div>
+                <div class="stat-label">Above 22,300</div>
+                <div class="stat-value" id="track-high-step-days">--</div>
+              </div>
+              <div>
+                <div class="stat-label">Missing days</div>
+                <div class="stat-value" id="track-missing-days">--</div>
+              </div>
+            </div>
+            <div class="stat-note" id="track-data-check-note">Future days are not counted as missing.</div>
+          </div>
         </div>
 
         <div class="goal-progress-list" aria-label="Day-count goals">
           <div class="goal-row">
             <div>
-              <div class="goal-label">Usual-days goal</div>
+              <div class="goal-label">Easy-day goal</div>
               <div class="goal-value" id="track-usual-count">-- / 60</div>
-              <div class="goal-detail" id="track-usual-detail">Days at or above the usual-days threshold.</div>
+              <div class="goal-detail" id="track-usual-detail">Aim for at least the easy-day target.</div>
             </div>
             <div class="goal-badge" id="track-usual-badge">--</div>
           </div>
 
           <div class="goal-row">
             <div>
-              <div class="goal-label">Middle-days goal</div>
+              <div class="goal-label">Regular-day goal</div>
               <div class="goal-value" id="track-middle-count">-- / 45</div>
-              <div class="goal-detail" id="track-middle-detail">Days at or above the median threshold.</div>
+              <div class="goal-detail" id="track-middle-detail">Aim for at least the regular-day target.</div>
             </div>
             <div class="goal-badge" id="track-middle-badge">--</div>
           </div>
 
           <div class="goal-row">
             <div>
-              <div class="goal-label">Active-days goal</div>
+              <div class="goal-label">Active-day goal</div>
               <div class="goal-value" id="track-active-count">-- / 30</div>
-              <div class="goal-detail" id="track-active-detail">Days at or above the more-active-days threshold.</div>
+              <div class="goal-detail" id="track-active-detail">Aim for at least the active-day target.</div>
             </div>
             <div class="goal-badge" id="track-active-badge">--</div>
           </div>
@@ -1753,8 +1889,8 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       <section class="chart-panel card" data-tab-panel="chart">
         <div class="chart-heading">
           <div>
-            <h2>Recommended</h2>
-            <p id="chart-subtitle">Density function of daily steps</p>
+            <h2>Advanced details</h2>
+            <p id="chart-subtitle">Step pattern across the 90-day plan</p>
           </div>
           <button class="help-button" id="chart-help" type="button" data-help="densityFunction" aria-label="What does this chart mean?">
             <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
@@ -1762,18 +1898,40 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         </div>
 
         <div class="chart-mode" role="tablist" aria-label="Chart mode">
-          <button id="density-mode" class="active" type="button" data-chart-mode="density" role="tab" aria-selected="true">Density</button>
-          <button id="quantile-mode" type="button" data-chart-mode="quantile" role="tab" aria-selected="false">Quantile</button>
+          <button id="density-mode" class="active" type="button" data-chart-mode="density" role="tab" aria-selected="true">Step pattern</button>
+          <button id="quantile-mode" type="button" data-chart-mode="quantile" role="tab" aria-selected="false">Targets</button>
         </div>
 
         <div id="chart-legend" class="chart-legend" aria-label="Chart legend"></div>
         <div id="plots"></div>
       </section>
 
+      <section class="action-card card" aria-label="Why this plan" data-tab-panel="insight">
+        <span class="action-icon" aria-hidden="true">
+          <svg class="sf-symbol"><use href="#icon-person"></use></svg>
+        </span>
+        <div>
+          <div class="action-kicker">Why this plan?</div>
+          <div class="action-headline">Based on your health profile.</div>
+          <div class="action-detail" id="why-plan-detail">The recommendation uses age, sex, BMI, blood pressure, and glucose.</div>
+        </div>
+      </section>
+
+      <section class="action-card card" aria-label="Research model" data-tab-panel="insight">
+        <span class="action-icon" aria-hidden="true">
+          <svg class="sf-symbol"><use href="#icon-nodes"></use></svg>
+        </span>
+        <div>
+          <div class="action-kicker">Research model</div>
+          <div class="action-headline">Offline reinforcement learning.</div>
+          <div class="action-detail">The model learns functional actions that represent a 90-day distribution of daily steps.</div>
+        </div>
+      </section>
+
       <section class="insight-panel card" data-tab-panel="insight">
         <button id="insight-toggle" class="insight-toggle" type="button" aria-expanded="false">
           <div>
-            <h2>Insight</h2>
+            <h2>Using the plan</h2>
             <p id="insight-summary">-</p>
           </div>
           <span class="chevron" id="insight-chevron" aria-hidden="true">
@@ -1786,25 +1944,16 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
               <svg class="sf-symbol"><use href="#icon-target"></use></svg>
             </span>
             <div>
-              <strong>Primary step goal</strong>
+              <strong>Main goal</strong>
               <span id="insight-main">-</span>
             </div>
           </div>
           <div class="insight-item">
             <span class="insight-icon insight-icon-chart" aria-hidden="true">
-              <svg class="sf-symbol"><use href="#icon-chart-axis"></use></svg>
+              <svg class="sf-symbol"><use href="#icon-calendar"></use></svg>
             </span>
             <div>
-              <strong>Day-count goals</strong>
-              <span id="insight-peak">-</span>
-            </div>
-          </div>
-          <div class="insight-item">
-            <span class="insight-icon insight-icon-sliders" aria-hidden="true">
-              <svg class="sf-symbol"><use href="#icon-sliders"></use></svg>
-            </span>
-            <div>
-              <strong>Flexible rhythm</strong>
+              <strong>Flexible days</strong>
               <span id="insight-range">-</span>
             </div>
           </div>
@@ -1815,6 +1964,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         <div class="panel-title-row">
           <div>
             <h2>Similar Profile Group</h2>
+            <p>Your plan is compared with people in a similar cardiometabolic profile group.</p>
           </div>
           <button class="help-button" type="button" data-help="subgroupAverage" aria-label="What does similar profile group mean?">
             <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
@@ -1823,7 +1973,16 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         <div id="subgroup-grid" class="subgroup-grid"></div>
       </section>
 
-      <p class="footnote" data-tab-panel="insight">Research use only, not clinical decision making.</p>
+      <section class="action-card card" aria-label="Research and safety note" data-tab-panel="insight">
+        <span class="action-icon" aria-hidden="true">
+          <svg class="sf-symbol"><use href="#icon-info"></use></svg>
+        </span>
+        <div>
+          <div class="action-kicker">Research prototype only</div>
+          <div class="action-headline">Not intended for clinical decision making.</div>
+          <div class="action-detail">Stop exercising and seek medical advice if you experience chest pain, dizziness, unusual shortness of breath, or severe discomfort.</div>
+        </div>
+      </section>
     </section>
   </div>
 
@@ -1843,8 +2002,8 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       <span>Track</span>
     </button>
     <button class="mobile-tab" type="button" data-mobile-tab="insight">
-      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-question"></use></svg>
-      <span>Insight</span>
+      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-info"></use></svg>
+      <span>About</span>
     </button>
     <button class="mobile-tab" type="button" data-mobile-tab="profile">
       <svg class="sf-symbol" aria-hidden="true"><use href="#icon-sliders"></use></svg>
@@ -2526,7 +2685,7 @@ const HELP_TOPICS = {
   },
   manualTracker: {
     title: "Manual tracker",
-    message: "This preview uses manually entered steps to estimate progress during the current 90-day cycle. It does not read Apple Health data.",
+    message: "This web version uses manually entered steps to estimate progress during the current 90-day cycle. Entries are stored in this browser.",
   },
   glucoseImputed: {
     title: "Glucose imputed",
@@ -2537,12 +2696,12 @@ const HELP_TOPICS = {
     message: "The glucose value entered in the profile and used by the recommendation model.",
   },
   densityFunction: {
-    title: "Density function",
-    message: "This curve shows which daily step levels are more or less likely in the recommended 90-day plan. Taller parts mean more days near that step level.",
+    title: "Step pattern",
+    message: "This advanced curve shows which daily step levels appear more often in the recommended 90-day plan. Taller parts mean more days near that step level.",
   },
   quantileFunction: {
-    title: "Quantile function",
-    message: "This curve maps a percentile of days to a daily step level. For example, lower percentiles represent lower-activity days.",
+    title: "Low-to-high targets",
+    message: "This advanced curve shows the daily step target from lower-activity days to more active days.",
   },
   subgroupAverage: {
     title: "Subgroup average",
@@ -2612,7 +2771,7 @@ function updateLegend() {
 
 function updateChartChrome() {
   const isDensity = chartMode === "density";
-  setText("chart-subtitle", isDensity ? "Density function of daily steps" : "Quantile function of daily steps");
+  setText("chart-subtitle", isDensity ? "Step pattern across the 90-day plan" : "Low-to-high daily step targets");
   document.getElementById("chart-help").dataset.help = isDensity ? "densityFunction" : "quantileFunction";
   document.querySelectorAll("[data-chart-mode]").forEach((button) => {
     const isActive = button.dataset.chartMode === chartMode;
@@ -2769,18 +2928,101 @@ function renderChart() {
 }
 
 function updateInsight(ctx) {
-  setText("insight-summary", "The plan translates the density and quantile curves into flexible 90-day step goals.");
-  setText("insight-main", "The primary goal comes from the strongest point of the density curve, not from a one-day maximum.");
-  setText("insight-peak", "The 60-, 45-, and 30-day goals come from the 33rd, 50th, and 67th percentiles of the recommended 90-day distribution.");
-  setText("insight-range", "The days do not need to look identical; the recommendation is about the overall 90-day rhythm.");
+  const glucoseSource = ctx.result.glucoseImputed ? "estimated glucose" : "measured glucose";
+  setText("why-plan-detail", `The recommendation uses age, sex, BMI, blood pressure, and ${glucoseSource}.`);
+  setText("insight-summary", "A plain-language explanation of how to use this 90-day plan.");
+  setText("insight-main", "Use the average daily steps as the main target across the full 90 days.");
+  setText("insight-range", "Some days can be lighter and some can be more active; the plan is not a strict daily minimum.");
 }
 
 function updateWalkingPlan(ctx) {
-  setText("plan-primary", `Aim for around ${ctx.primaryStepRounded} steps as your primary daily step goal.`);
-  setText("plan-usual", `On about 60 days, aim for at least ${ctx.q33Rounded} steps.`);
-  setText("plan-middle", `On about 45 days, aim for at least ${ctx.q50Rounded} steps.`);
-  setText("plan-active", `On about 30 days, aim for at least ${ctx.q67Rounded} steps.`);
-  setText("plan-average", `Aim for an average of around ${ctx.meanRounded} steps per day across 90 days.`);
+  setText("plan-primary", `≈ ${ctx.meanRounded}`);
+  setText("plan-usual", `≈ ${ctx.q33Rounded}`);
+  setText("plan-middle", `≈ ${ctx.q50Rounded}`);
+  setText("plan-active", `≈ ${ctx.q67Rounded}`);
+}
+
+function planningRangeText(low, high) {
+  const lowText = formatHundred(low);
+  const highText = formatHundred(high);
+  if (lowText === highText) return `≈ ${lowText} steps`;
+  return `≈ ${lowText}-${highText} steps`;
+}
+
+function expectedGoalDays(currentDay, targetDays) {
+  return Math.floor((clamp(currentDay, 1, 90) / 90) * targetDays);
+}
+
+function currentTrackValues(state) {
+  const todayKey = localDateString();
+  const startKey = clampDateKeyToToday(state.cycleStart);
+  const currentDay = clamp(dateKeyOffset(todayKey, startKey) + 1, 1, 90);
+  const entries = Object.entries(state.entries)
+    .filter(([dateKey, steps]) => {
+      const offset = dateKeyOffset(dateKey, startKey);
+      return offset >= 0 && offset < currentDay && offset < 90 && Number.isFinite(Number(steps));
+    });
+  const stepValues = entries.map(([, steps]) => Number(steps));
+  return {currentDay, stepValues};
+}
+
+function todayPlanningGuide(ctx) {
+  const state = loadTrackState();
+  const {currentDay, stepValues} = currentTrackValues(state);
+  const loggedDays = stepValues.length;
+
+  if (loggedDays === 0) {
+    return {
+      title: "Easy-regular day",
+      rangeText: planningRangeText(ctx.q33, ctx.q50),
+      detail: "Start with this practical range while your 90-day progress data builds up.",
+    };
+  }
+
+  const totalSteps = stepValues.reduce((sum, value) => sum + value, 0);
+  const averageSoFar = totalSteps / loggedDays;
+  const easyCount = countDaysAtOrAbove(stepValues, ctx.q33);
+  const regularCount = countDaysAtOrAbove(stepValues, ctx.q50);
+  const activeCount = countDaysAtOrAbove(stepValues, ctx.q67);
+  const expectedEasy = expectedGoalDays(currentDay, 60);
+  const expectedRegular = expectedGoalDays(currentDay, 45);
+  const expectedActive = expectedGoalDays(currentDay, 30);
+
+  if (activeCount < expectedActive) {
+    return {
+      title: "Active-day opportunity",
+      rangeText: planningRangeText(ctx.q67, Math.min(ctx.q67 * 1.2, 22300)),
+      detail: "Your active-day count is behind the pace for about 30 active days in this 90-day plan.",
+    };
+  }
+
+  if (regularCount < expectedRegular || averageSoFar < ctx.meanSteps * 0.95) {
+    return {
+      title: "Regular-active day",
+      rangeText: planningRangeText(ctx.q50, ctx.q67),
+      detail: "This range helps support your regular-day count or 90-day average progress.",
+    };
+  }
+
+  if (averageSoFar >= ctx.meanSteps * 1.08 && easyCount >= expectedEasy && regularCount >= expectedRegular && activeCount >= expectedActive) {
+    return {
+      title: "Easy day is fine",
+      rangeText: planningRangeText(ctx.q33, ctx.q50),
+      detail: "Your current pattern is ahead of pace, so a lighter day can still fit the 90-day distribution.",
+    };
+  }
+
+  return {
+    title: "Easy-regular day",
+    rangeText: planningRangeText(ctx.q33, ctx.q50),
+    detail: "Your current pattern is on pace, so use this practical range for today.",
+  };
+}
+
+function updateTodayPlanningGuide(ctx) {
+  const guide = todayPlanningGuide(ctx);
+  setText("today-guide-headline", `${guide.title}: ${guide.rangeText}`);
+  setText("today-guide-detail", guide.detail);
 }
 
 function localDateString(date = new Date()) {
@@ -2837,10 +3079,10 @@ function actualQuantile(values, level) {
 
 function trackStatusLabel(ratio, loggedDays) {
   if (!Number.isFinite(ratio)) return "--";
-  if (loggedDays > 0 && loggedDays < 7) return "Logging";
-  if (ratio >= 1) return "On track";
+  if (loggedDays > 0 && loggedDays < 7) return "Getting started";
+  if (ratio >= 1) return "On plan";
   if (ratio >= 0.8) return "Close";
-  return "Behind";
+  return "Needs attention";
 }
 
 function countDaysAtOrAbove(values, threshold) {
@@ -2856,16 +3098,16 @@ function updateScoreMeter(percent) {
 }
 
 function trackScoreStage(score, loggedDays) {
-  if (loggedDays === 0) return "Waiting";
-  if (loggedDays < 7) return "Starting";
-  if (loggedDays < 30) return "Early estimate";
-  if (score >= 80) return "Strong match";
+  if (loggedDays === 0) return "Not started";
+  if (loggedDays < 7) return "Getting started";
+  if (score >= 80) return "On plan";
   if (score >= 60) return "Close";
-  return "Building";
+  return "Needs attention";
 }
 
 function updateTrackPanel(ctx) {
   if (!ctx) return;
+  updateTodayPlanningGuide(ctx);
 
   const state = loadTrackState();
   const todayKey = localDateString();
@@ -2878,13 +3120,17 @@ function updateTrackPanel(ctx) {
   const entries = Object.entries(state.entries)
     .filter(([dateKey, steps]) => {
       const offset = dateKeyOffset(dateKey, startKey);
-      return offset >= 0 && offset < 90 && Number.isFinite(Number(steps));
+      return offset >= 0 && offset < currentDay && offset < 90 && Number.isFinite(Number(steps));
     })
     .sort(([a], [b]) => a.localeCompare(b));
   const stepValues = entries.map(([, steps]) => Number(steps));
   const loggedDays = stepValues.length;
   const totalSteps = stepValues.reduce((sum, value) => sum + value, 0);
   const averageSoFar = loggedDays ? totalSteps / loggedDays : null;
+  const checkedDays = Math.round(currentDay);
+  const lowStepDays = stepValues.filter((value) => value < 100).length;
+  const highStepDays = stepValues.filter((value) => value > 22300).length;
+  const missingDays = Math.max(0, checkedDays - loggedDays);
   const remainingDays = Math.max(90 - loggedDays, 0);
   const neededFromHere = remainingDays > 0 && loggedDays > 0
     ? Math.max(0, (ctx.meanSteps * 90 - totalSteps) / remainingDays)
@@ -2900,6 +3146,10 @@ function updateTrackPanel(ctx) {
   setText("track-cycle-day", `Day ${Math.round(currentDay)} of 90`);
   setText("track-average", averageSoFar === null ? "--" : `${formatHundred(averageSoFar)}`);
   setText("track-needed", neededFromHere === null ? "--" : `${formatHundred(neededFromHere)}`);
+  setText("track-low-step-days", `${lowStepDays}`);
+  setText("track-high-step-days", `${highStepDays}`);
+  setText("track-missing-days", `${missingDays}`);
+  setText("track-data-check-note", `Checked ${checkedDays} day${checkedDays === 1 ? "" : "s"} in this cycle. Future days are not counted as missing.`);
 
   const thresholds = [
     {
@@ -2931,7 +3181,7 @@ function updateTrackPanel(ctx) {
     setText(`track-${goal.key}-count`, `${count} / ${goal.targetDays} days`);
     setText(
       `track-${goal.key}-detail`,
-      `At least ${goal.rounded} steps.`
+      `Aim for at least ${goal.rounded} steps`
     );
     setText(`track-${goal.key}-badge`, loggedDays ? trackStatusLabel(ratio, loggedDays) : "--");
   });
@@ -2939,7 +3189,7 @@ function updateTrackPanel(ctx) {
   if (loggedDays === 0) {
     setText("track-score", "--");
     setText("track-score-stage", trackScoreStage(0, loggedDays));
-    setText("track-score-copy", "Enter today's steps to start the live score.");
+    setText("track-score-copy", "Enter steps to start. The score will compare your average and goal-day counts with the 90-day plan.");
     updateScoreMeter(0);
     return;
   }
@@ -2963,12 +3213,11 @@ function updateTrackPanel(ctx) {
   const score = clamp(planScore, 0, 100);
   setText("track-score", `${score}`);
   setText("track-score-stage", trackScoreStage(score, loggedDays));
-  const scorePrefix = loggedDays < 30 ? "Live early score: " : "Live score: ";
   setText("track-score-copy", score >= 80
-    ? `${scorePrefix}your entered steps are close to the recommended 90-day rhythm.`
+    ? "You are on pace: your average steps and goal-day counts are close to the 90-day plan."
     : score >= 60
-      ? `${scorePrefix}your entered steps are partly aligned with the recommended 90-day rhythm.`
-      : `${scorePrefix}keep logging; the score becomes more reliable as more days are entered.`);
+      ? "You are close: your average steps or goal-day counts need a little more support."
+      : "Needs attention: your average steps or goal-day counts are below the planned pace. Focus on the next few days.");
   updateScoreMeter(score);
 }
 
@@ -3012,10 +3261,12 @@ function renderResult(result) {
 
   setText("glucose-card-label", result.glucoseImputed ? "Glucose est." : "Glucose");
   setText("glucose-used", result.glucoseRaw.toFixed(1));
-  document.getElementById("glucose-help").dataset.help = result.glucoseImputed ? "glucoseImputed" : "glucoseMeasured";
+  const glucoseHelp = document.getElementById("glucose-help");
+  if (glucoseHelp) glucoseHelp.dataset.help = result.glucoseImputed ? "glucoseImputed" : "glucoseMeasured";
   setText("mean-steps", `≈ ${meanRounded}`);
   setText("peak-steps", peakCardText);
-  document.getElementById("peak-steps").classList.toggle("long", peaks.length > 1);
+  const peakStepsElement = document.getElementById("peak-steps");
+  if (peakStepsElement) peakStepsElement.classList.toggle("long", peaks.length > 1);
   setText("q33-steps", `≈ ${q33Rounded}`);
   setText("q67-steps", `≈ ${q67Rounded}`);
 
@@ -3306,7 +3557,6 @@ document.querySelectorAll("input[name='sex-choice']").forEach((input) => {
   });
 });
 
-document.getElementById("open-profile").addEventListener("click", openProfilePanel);
 document.getElementById("close-profile").addEventListener("click", closeProfilePanel);
 profileBackdrop.addEventListener("click", closeProfilePanel);
 
