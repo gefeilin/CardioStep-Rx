@@ -113,6 +113,83 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 
     body.profile-open { overflow: hidden; }
 
+    .app-launch-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      overflow: hidden;
+      background: #f8fcfb;
+      transition: opacity 0.45s ease, visibility 0.45s ease;
+    }
+
+    .app-launch-screen.is-dismissing {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+
+    .launch-artwork {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transform: scale(1.035);
+      animation: launchArtworkIn 0.82s ease-out forwards;
+    }
+
+    .launch-dots {
+      position: absolute;
+      left: 50%;
+      bottom: calc(48px + env(safe-area-inset-bottom));
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      padding: 12px 18px;
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: 0 10px 24px rgba(0, 83, 104, 0.08);
+      transform: translateX(-50%);
+    }
+
+    .launch-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      animation: launchDotPulse 0.64s ease-in-out infinite alternate;
+    }
+
+    .launch-dot:nth-child(1) { background: #0d6fbd; }
+    .launch-dot:nth-child(2) { background: #2eb89a; animation-delay: 0.16s; }
+    .launch-dot:nth-child(3) { background: #468ce0; animation-delay: 0.32s; }
+
+    @keyframes launchArtworkIn {
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    @keyframes launchDotPulse {
+      from {
+        opacity: 0.45;
+        transform: scale(0.62);
+      }
+      to {
+        opacity: 0.95;
+        transform: scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .launch-artwork,
+      .launch-dot {
+        animation: none;
+        opacity: 1;
+        transform: none;
+      }
+    }
+
     main {
       width: min(1180px, 100%);
       margin: 0 auto;
@@ -1560,6 +1637,14 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
   </style>
 </head>
 <body>
+<div class="app-launch-screen" id="app-launch-screen" role="status" aria-label="Loading CardioStepRx">
+  <img class="launch-artwork" src="lauch.png" alt="">
+  <div class="launch-dots" aria-hidden="true">
+    <span class="launch-dot"></span>
+    <span class="launch-dot"></span>
+    <span class="launch-dot"></span>
+  </div>
+</div>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
   <symbol id="icon-question" viewBox="0 0 24 24">
     <circle cx="12" cy="12" r="9"></circle>
@@ -3731,6 +3816,15 @@ function syncResponsiveState() {
   syncMobileTabPanels();
 }
 
+function hideLaunchScreen() {
+  const launchScreen = document.getElementById("app-launch-screen");
+  if (!launchScreen) return;
+  window.setTimeout(() => {
+    launchScreen.classList.add("is-dismissing");
+    window.setTimeout(() => launchScreen.remove(), 520);
+  }, 900);
+}
+
 window.addEventListener("resize", syncResponsiveState);
 mobileViewportQuery.addEventListener?.("change", syncResponsiveState);
 syncProfilePanelVisibility();
@@ -3742,6 +3836,7 @@ if (shouldOpenInitialProfile && isMobileSheetMode()) {
 if (window.scrollTo) {
   setTimeout(() => window.scrollTo(0, 0), 0);
 }
+hideLaunchScreen();
 </script>
 </body>
 </html>
