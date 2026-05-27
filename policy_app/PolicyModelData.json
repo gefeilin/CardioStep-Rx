@@ -945,7 +945,7 @@
   },
   "subgroupReferenceSampleCount": 2000,
   "exampleRaw": {
-    "glucose": "100",
+    "glucose": "",
     "bmi": 24,
     "dbp": 70,
     "sbp": 115,
