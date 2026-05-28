@@ -212,13 +212,13 @@ struct PolicyDashboardView: View {
                         .foregroundStyle(AppTheme.green)
                         .lineLimit(1)
                 }
-                Text("Your precise 90-day Physical Activity prescription")
+                Text("Your 90-day Precision Physical Activity Prescription")
                     .font(.system(size: isWide ? 30 : 25, weight: .bold, design: .default))
                     .foregroundStyle(AppTheme.ink)
                     .lineLimit(2)
                     .minimumScaleFactor(0.72)
                     .accessibilityIdentifier("appTitle")
-                Text("Personalized daily-step guidance for cardiometabolic risk")
+                Text("Personalized daily-step guidance to reduce cardiometabolic risk")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .lineLimit(3)
@@ -913,7 +913,7 @@ private struct MissedDayCard: View {
     var body: some View {
         ActionInfoCard(
             icon: "heart",
-            title: "If you miss a day",
+            title: "If you miss only a few days",
             headline: "That is okay.",
             detail: "This is a flexible 90-day distribution of recommended steps, not a perfect same-step daily goal."
         )
