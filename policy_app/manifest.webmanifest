@@ -5,8 +5,8 @@
   "start_url": "./policy_app.html",
   "scope": "./",
   "display": "standalone",
-  "background_color": "#f1f9fd",
-  "theme_color": "#0083ac",
+  "background_color": "#f7fcfd",
+  "theme_color": "#0a8f8f",
   "icons": [
     {
       "src": "web-app-icon-192.png",

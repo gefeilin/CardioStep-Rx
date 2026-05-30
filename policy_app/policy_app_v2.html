@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>CardioStepRx</title>
   <meta name="application-name" content="CardioStepRx">
-  <meta name="theme-color" content="#0083ac">
+  <meta name="theme-color" content="#0a8f8f">
   <meta name="apple-mobile-web-app-title" content="CardioStepRx">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -87,19 +87,21 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
   </script>
   <style>
     :root {
-      --bg: #f1f9fd;
+      --bg: #f7fcfd;
       --panel: #ffffff;
-      --ink: #091a34;
-      --muted: #6b7280;
-      --line: #c3ddee;
-      --accent: #0083ac;
-      --accent-dark: #006f91;
-      --accent-soft: #e5f4fa;
-      --blue: #1274e3;
-      --purple: #043c8b;
-      --reference: #8997a8;
-      --red: #ec4140;
-      --shadow: 0 10px 28px rgba(9, 26, 52, 0.08);
+      --ink: #062241;
+      --muted: #65788a;
+      --line: #cfe8ef;
+      --accent: #0a8f8f;
+      --accent-dark: #053f74;
+      --accent-soft: #e4f7f4;
+      --teal: #2eb89a;
+      --blue: #0d6fbd;
+      --purple: #053f74;
+      --reference: #7891a3;
+      --red: #d85c57;
+      --brand-gradient: linear-gradient(135deg, #0a8f8f 0%, #0d6fbd 56%, #053f74 100%);
+      --shadow: 0 10px 28px rgba(6, 34, 65, 0.08);
     }
 
     * { box-sizing: border-box; }
@@ -152,7 +154,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       border: 1px solid rgba(255, 255, 255, 0.82);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.68);
-      box-shadow: 0 10px 24px rgba(0, 83, 104, 0.08);
+      box-shadow: 0 10px 24px rgba(5, 63, 116, 0.08);
       transform: translateX(-50%);
     }
 
@@ -356,7 +358,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       width: 34px;
       height: 34px;
       border-radius: 999px;
-      background: rgba(0, 131, 172, 0.10);
+      background: rgba(10, 143, 143, 0.10);
       color: var(--accent);
     }
 
@@ -461,7 +463,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 
     input:focus, select:focus {
       border-color: var(--accent);
-      outline: 3px solid rgba(0, 131, 172, 0.14);
+      outline: 3px solid rgba(10, 143, 143, 0.14);
     }
 
     .field-label-row {
@@ -495,7 +497,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       padding: 2px;
       border: 1px solid var(--line);
       border-radius: 7px;
-      background: #eef5fa;
+      background: #edf8fb;
     }
 
     .compact-unit-switch.weight {
@@ -522,7 +524,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .compact-unit-switch input:checked + label {
       color: var(--ink);
       background: #fff;
-      box-shadow: 0 1px 3px rgba(9, 26, 52, 0.10);
+      box-shadow: 0 1px 3px rgba(6, 34, 65, 0.10);
     }
 
     .segmented-select {
@@ -532,7 +534,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       min-height: 42px;
       padding: 3px;
       border-radius: 8px;
-      background: #eef5fa;
+      background: #edf8fb;
       border: 1px solid var(--line);
     }
 
@@ -555,7 +557,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .segmented-select input:checked + label {
       color: var(--ink);
       background: #fff;
-      box-shadow: 0 1px 4px rgba(9, 26, 52, 0.10);
+      box-shadow: 0 1px 4px rgba(6, 34, 65, 0.10);
     }
 
     .actions {
@@ -582,7 +584,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 
     .primary-button {
       border: 0;
-      background: var(--accent);
+      background: var(--brand-gradient);
       color: #fff;
     }
 
@@ -664,7 +666,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       align-items: stretch;
       padding: 14px;
       border-radius: 8px;
-      background: var(--accent);
+      background: var(--brand-gradient);
       color: #fff;
     }
 
@@ -797,7 +799,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     }
 
     .plan-item.primary {
-      background: rgba(0, 131, 172, 0.08);
+      background: rgba(10, 143, 143, 0.08);
     }
 
     .plan-icon {
@@ -806,7 +808,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       width: 28px;
       height: 28px;
       border-radius: 999px;
-      background: rgba(0, 131, 172, 0.10);
+      background: rgba(10, 143, 143, 0.10);
       color: var(--accent);
     }
 
@@ -888,7 +890,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       gap: 12px;
       padding: 12px;
       border-radius: 8px;
-      background: rgba(0, 131, 172, 0.08);
+      background: rgba(10, 143, 143, 0.08);
     }
 
     .score-row {
@@ -958,14 +960,14 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       border-radius: 999px;
       background: linear-gradient(
         90deg,
-        rgba(0, 131, 172, 0.13) 0%,
-        rgba(0, 131, 172, 0.13) 25%,
-        rgba(0, 131, 172, 0.2) 25%,
-        rgba(0, 131, 172, 0.2) 50%,
-        rgba(0, 131, 172, 0.3) 50%,
-        rgba(0, 131, 172, 0.3) 75%,
-        rgba(0, 131, 172, 0.45) 75%,
-        rgba(0, 131, 172, 0.45) 100%
+        rgba(10, 143, 143, 0.13) 0%,
+        rgba(10, 143, 143, 0.13) 25%,
+        rgba(10, 143, 143, 0.2) 25%,
+        rgba(10, 143, 143, 0.2) 50%,
+        rgba(10, 143, 143, 0.3) 50%,
+        rgba(10, 143, 143, 0.3) 75%,
+        rgba(10, 143, 143, 0.45) 75%,
+        rgba(10, 143, 143, 0.45) 100%
       );
     }
 
@@ -987,7 +989,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       border: 3px solid var(--accent);
       border-radius: 999px;
       background: #fff;
-      box-shadow: 0 4px 12px rgba(0, 72, 96, 0.22);
+      box-shadow: 0 4px 12px rgba(5, 63, 116, 0.22);
       transform: translateX(-50%);
       transition: left 180ms ease;
     }
@@ -1154,7 +1156,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .goal-badge {
       min-width: 58px;
       border-radius: 999px;
-      background: rgba(0, 131, 172, 0.10);
+      background: rgba(10, 143, 143, 0.10);
       color: var(--accent);
       padding: 7px 9px;
       text-align: center;
@@ -1208,7 +1210,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       padding: 3px;
       border: 1px solid var(--line);
       border-radius: 8px;
-      background: #eef5fa;
+      background: #edf8fb;
     }
 
     .chart-mode button {
@@ -1224,7 +1226,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .chart-mode button.active {
       background: #fff;
       color: var(--ink);
-      box-shadow: 0 1px 4px rgba(9, 26, 52, 0.10);
+      box-shadow: 0 1px 4px rgba(6, 34, 65, 0.10);
     }
 
     .chart-legend {
@@ -1343,7 +1345,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       width: 28px;
       height: 28px;
       border-radius: 999px;
-      background: rgba(0, 131, 172, 0.10);
+      background: rgba(10, 143, 143, 0.10);
       color: var(--accent);
       line-height: 0;
     }
@@ -1467,7 +1469,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 
     .mobile-tab.active {
       color: var(--accent);
-      background: rgba(0, 131, 172, 0.10);
+      background: rgba(10, 143, 143, 0.10);
     }
 
     @media (max-width: 819px), (hover: none) and (pointer: coarse) {
@@ -1508,7 +1510,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         padding: 10px 16px 14px;
         border-bottom: 1px solid var(--line);
         border-radius: 18px;
-        box-shadow: 0 18px 48px rgba(9, 26, 52, 0.18);
+        box-shadow: 0 18px 48px rgba(6, 34, 65, 0.18);
         --sheet-offset: calc(100% + 32px);
         opacity: 0;
         visibility: hidden;
@@ -1622,7 +1624,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         position: fixed;
         inset: 0;
         z-index: 20;
-        background: rgba(9, 26, 52, 0.28);
+        background: rgba(6, 34, 65, 0.28);
       }
 
       .sheet-backdrop:not([hidden]) { display: block; }
@@ -1656,7 +1658,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
         border-top: 1px solid rgba(148, 163, 184, 0.26);
         background: rgba(255, 255, 255, 0.92);
-        box-shadow: 0 -12px 30px rgba(9, 26, 52, 0.08);
+        box-shadow: 0 -12px 30px rgba(6, 34, 65, 0.08);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
       }
@@ -2821,14 +2823,14 @@ function densityMarkerAnnotations(peaks, meanSteps, meanDensity, meanRounded) {
       step: peak.step,
       density: peak.density,
       text: `Peak ≈ ${formatHundred(peak.step)}`,
-      borderColor: "rgba(217,83,79,0.62)",
+      borderColor: "rgba(216,92,87,0.62)",
       kind: "peak",
     })),
     {
       step: meanSteps,
       density: meanDensity,
       text: `Average ≈ ${meanRounded}`,
-      borderColor: "rgba(47,111,237,0.62)",
+      borderColor: "rgba(13,111,189,0.62)",
       kind: "average",
     },
   ].sort((a, b) => b.density - a.density);
@@ -2975,8 +2977,8 @@ function compactDensityMarkerAnnotations(peaks, meanSteps, meanDensity, meanRoun
       text: `Peak ≈ ${formatHundred(mainPeak.step)}`,
       ax: peakIsRight ? 46 : -46,
       ay: -38,
-      bordercolor: "rgba(217,83,79,0.64)",
-      arrowcolor: "rgba(217,83,79,0.72)",
+      bordercolor: "rgba(216,92,87,0.64)",
+      arrowcolor: "rgba(216,92,87,0.72)",
     },
     {
       ...common,
@@ -2985,21 +2987,21 @@ function compactDensityMarkerAnnotations(peaks, meanSteps, meanDensity, meanRoun
       text: `Average ≈ ${meanRounded}`,
       ax: peakIsRight ? -50 : 50,
       ay: 42,
-      bordercolor: "rgba(47,111,237,0.64)",
-      arrowcolor: "rgba(47,111,237,0.72)",
+      bordercolor: "rgba(13,111,189,0.64)",
+      arrowcolor: "rgba(13,111,189,0.72)",
     },
   ];
 }
 
 const THEME = {
-  ink: "#091a34",
-  line: "#c3ddee",
-  grid: "#e4eef6",
-  accent: "#0083ac",
-  blue: "#1274e3",
-  purple: "#043c8b",
-  reference: "#8997a8",
-  red: "#ec4140",
+  ink: "#062241",
+  line: "#cfe8ef",
+  grid: "#e3f1f5",
+  accent: "#0a8f8f",
+  blue: "#0d6fbd",
+  purple: "#053f74",
+  reference: "#7891a3",
+  red: "#d85c57",
 };
 
 const HELP_TOPICS = {

@@ -881,7 +881,7 @@ private struct SummaryGrid: View {
             }
             .padding(14)
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(AppTheme.green)
+            .background(AppTheme.primaryGradient)
             .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
 
             LazyVGrid(columns: [GridItem(.flexible(), spacing: 8), GridItem(.flexible(), spacing: 8), GridItem(.flexible())], spacing: 8) {
@@ -1045,7 +1045,7 @@ private struct MainStepGoalCard: View {
         }
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(AppTheme.green)
+        .background(AppTheme.primaryGradient)
         .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
         .accessibilityElement(children: .combine)
         .accessibilityLabel("Main goal. Aim for about \(result.meanRounded) steps per day on average across the next 90 days.")
@@ -2449,14 +2449,20 @@ private extension View {
 }
 
 private enum AppTheme {
-    static let background = Color(red: 0.945, green: 0.976, blue: 0.992)
-    static let ink = Color(red: 0.035, green: 0.102, blue: 0.205)
-    static let line = Color(red: 0.765, green: 0.867, blue: 0.932)
-    static let green = Color(red: 0.000, green: 0.515, blue: 0.675)
-    static let blue = Color(red: 0.070, green: 0.455, blue: 0.890)
-    static let purple = Color(red: 0.015, green: 0.235, blue: 0.545)
-    static let reference = Color(red: 0.535, green: 0.592, blue: 0.660)
-    static let red = Color(red: 0.925, green: 0.255, blue: 0.250)
+    static let background = Color(red: 0.969, green: 0.988, blue: 0.992)
+    static let ink = Color(red: 0.024, green: 0.133, blue: 0.255)
+    static let line = Color(red: 0.812, green: 0.910, blue: 0.937)
+    static let green = Color(red: 0.039, green: 0.561, blue: 0.561)
+    static let blue = Color(red: 0.051, green: 0.435, blue: 0.741)
+    static let purple = Color(red: 0.020, green: 0.247, blue: 0.455)
+    static let reference = Color(red: 0.471, green: 0.569, blue: 0.639)
+    static let red = Color(red: 0.847, green: 0.361, blue: 0.341)
+
+    static let primaryGradient = LinearGradient(
+        colors: [green, blue, purple],
+        startPoint: .topLeading,
+        endPoint: .bottomTrailing
+    )
 }
 
 private let integerFormatter: NumberFormatter = {
