@@ -168,6 +168,29 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .launch-dot:nth-child(2) { background: #2eb89a; animation-delay: 0.16s; }
     .launch-dot:nth-child(3) { background: #468ce0; animation-delay: 0.32s; }
 
+    .launch-sparkle-layer {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    .launch-sparkle {
+      position: absolute;
+      left: 22%;
+      top: 29%;
+      width: 22px;
+      height: 22px;
+      background: linear-gradient(135deg, #fff 0%, #93f2ec 52%, #0d6fbd 100%);
+      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 35%);
+      filter:
+        drop-shadow(0 0 10px rgba(50, 203, 209, 0.48))
+        drop-shadow(-16px 9px 8px rgba(117, 233, 220, 0.35))
+        drop-shadow(-30px 16px 10px rgba(255, 255, 255, 0.42));
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.72) rotate(-18deg);
+      animation: launchSparkleArc 1.9s cubic-bezier(0.2, 0.74, 0.2, 1) infinite;
+    }
+
     @keyframes launchArtworkIn {
       to {
         opacity: 1;
@@ -186,9 +209,37 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       }
     }
 
+    @keyframes launchSparkleArc {
+      0% {
+        left: 22%;
+        top: 29%;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.68) rotate(-18deg);
+      }
+      12% {
+        opacity: 1;
+      }
+      50% {
+        left: 50%;
+        top: 15.5%;
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1.08) rotate(20deg);
+      }
+      88% {
+        opacity: 1;
+      }
+      100% {
+        left: 78%;
+        top: 29%;
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(0.82) rotate(54deg);
+      }
+    }
+
     @media (prefers-reduced-motion: reduce) {
       .launch-artwork,
-      .launch-dot {
+      .launch-dot,
+      .launch-sparkle {
         animation: none;
         opacity: 1;
         transform: none;
@@ -1725,6 +1776,9 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 <body>
 <div class="app-launch-screen" id="app-launch-screen" role="status" aria-label="Loading CardioStepRx">
   <img class="launch-artwork" src="lauch.png" alt="">
+  <div class="launch-sparkle-layer" aria-hidden="true">
+    <span class="launch-sparkle"></span>
+  </div>
   <div class="launch-dots" aria-hidden="true">
     <span class="launch-dot"></span>
     <span class="launch-dot"></span>
@@ -4122,7 +4176,7 @@ function hideLaunchScreen() {
   window.setTimeout(() => {
     launchScreen.classList.add("is-dismissing");
     window.setTimeout(() => launchScreen.remove(), 520);
-  }, 900);
+  }, 1800);
 }
 
 window.addEventListener("resize", syncResponsiveState);
