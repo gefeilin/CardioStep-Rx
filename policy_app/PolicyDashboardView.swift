@@ -2471,14 +2471,14 @@ private extension View {
 }
 
 private enum AppTheme {
-    static let background = Color(red: 0.969, green: 0.988, blue: 0.992)
-    static let ink = Color(red: 0.024, green: 0.133, blue: 0.255)
-    static let line = Color(red: 0.812, green: 0.910, blue: 0.937)
-    static let green = Color(red: 0.039, green: 0.561, blue: 0.561)
-    static let blue = Color(red: 0.051, green: 0.435, blue: 0.741)
-    static let purple = Color(red: 0.020, green: 0.247, blue: 0.455)
-    static let reference = Color(red: 0.471, green: 0.569, blue: 0.639)
-    static let red = Color(red: 0.847, green: 0.361, blue: 0.341)
+    static let background = Color(red: 0.961, green: 0.980, blue: 0.984)
+    static let ink = Color(red: 0.027, green: 0.122, blue: 0.200)
+    static let line = Color(red: 0.847, green: 0.910, blue: 0.922)
+    static let green = Color(red: 0.043, green: 0.471, blue: 0.463)
+    static let blue = Color(red: 0.059, green: 0.388, blue: 0.533)
+    static let purple = Color(red: 0.071, green: 0.227, blue: 0.380)
+    static let reference = Color(red: 0.498, green: 0.553, blue: 0.596)
+    static let red = Color(red: 0.780, green: 0.396, blue: 0.349)
 
     static let primaryGradient = LinearGradient(
         colors: [green, blue, purple],

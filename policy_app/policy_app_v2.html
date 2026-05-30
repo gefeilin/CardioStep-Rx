@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>CardioStepRx</title>
   <meta name="application-name" content="CardioStepRx">
-  <meta name="theme-color" content="#0a8f8f">
+  <meta name="theme-color" content="#0b7876">
   <meta name="apple-mobile-web-app-title" content="CardioStepRx">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -87,21 +87,21 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
   </script>
   <style>
     :root {
-      --bg: #f7fcfd;
+      --bg: #f5fafb;
       --panel: #ffffff;
-      --ink: #062241;
-      --muted: #65788a;
-      --line: #cfe8ef;
-      --accent: #0a8f8f;
-      --accent-dark: #053f74;
-      --accent-soft: #e4f7f4;
-      --teal: #2eb89a;
-      --blue: #0d6fbd;
-      --purple: #053f74;
-      --reference: #7891a3;
-      --red: #d85c57;
-      --brand-gradient: linear-gradient(135deg, #0a8f8f 0%, #0d6fbd 56%, #053f74 100%);
-      --shadow: 0 10px 28px rgba(6, 34, 65, 0.08);
+      --ink: #071f33;
+      --muted: #607181;
+      --line: #d8e8eb;
+      --accent: #0b7876;
+      --accent-dark: #082f49;
+      --accent-soft: #e7f3f1;
+      --teal: #46b8a7;
+      --blue: #0f6388;
+      --purple: #123a61;
+      --reference: #7f8d98;
+      --red: #c76559;
+      --brand-gradient: linear-gradient(135deg, #0b7876 0%, #0f6388 56%, #082f49 100%);
+      --shadow: 0 10px 28px rgba(7, 31, 51, 0.08);
     }
 
     * { box-sizing: border-box; }
@@ -125,7 +125,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       inset: 0;
       z-index: 9999;
       overflow: hidden;
-      background: #f8fcfb;
+      background: #f6fbfb;
       transition: opacity 0.45s ease, visibility 0.45s ease;
     }
 
@@ -154,7 +154,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       border: 1px solid rgba(255, 255, 255, 0.82);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.68);
-      box-shadow: 0 10px 24px rgba(5, 63, 116, 0.08);
+      box-shadow: 0 10px 24px rgba(7, 31, 51, 0.08);
       transform: translateX(-50%);
     }
 
@@ -162,9 +162,9 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       width: 27px;
       height: 27px;
       border-radius: 999px;
-      border: 3.4px solid rgba(46, 184, 154, 0.22);
-      border-top-color: #0d6fbd;
-      border-right-color: #2eb89a;
+      border: 3.4px solid rgba(70, 184, 167, 0.22);
+      border-top-color: #0f6388;
+      border-right-color: #46b8a7;
       animation: launchRingSpin 0.95s linear infinite;
     }
 
@@ -524,7 +524,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .compact-unit-switch input:checked + label {
       color: var(--ink);
       background: #fff;
-      box-shadow: 0 1px 3px rgba(6, 34, 65, 0.10);
+      box-shadow: 0 1px 3px rgba(7, 31, 51, 0.10);
     }
 
     .segmented-select {
@@ -557,7 +557,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .segmented-select input:checked + label {
       color: var(--ink);
       background: #fff;
-      box-shadow: 0 1px 4px rgba(6, 34, 65, 0.10);
+      box-shadow: 0 1px 4px rgba(7, 31, 51, 0.10);
     }
 
     .actions {
@@ -989,7 +989,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       border: 3px solid var(--accent);
       border-radius: 999px;
       background: #fff;
-      box-shadow: 0 4px 12px rgba(5, 63, 116, 0.22);
+      box-shadow: 0 4px 12px rgba(8, 47, 73, 0.22);
       transform: translateX(-50%);
       transition: left 180ms ease;
     }
@@ -1226,7 +1226,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .chart-mode button.active {
       background: #fff;
       color: var(--ink);
-      box-shadow: 0 1px 4px rgba(6, 34, 65, 0.10);
+      box-shadow: 0 1px 4px rgba(7, 31, 51, 0.10);
     }
 
     .chart-legend {
@@ -1510,7 +1510,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         padding: 10px 16px 14px;
         border-bottom: 1px solid var(--line);
         border-radius: 18px;
-        box-shadow: 0 18px 48px rgba(6, 34, 65, 0.18);
+        box-shadow: 0 18px 48px rgba(7, 31, 51, 0.18);
         --sheet-offset: calc(100% + 32px);
         opacity: 0;
         visibility: hidden;
@@ -1624,7 +1624,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         position: fixed;
         inset: 0;
         z-index: 20;
-        background: rgba(6, 34, 65, 0.28);
+        background: rgba(7, 31, 51, 0.28);
       }
 
       .sheet-backdrop:not([hidden]) { display: block; }
@@ -1658,7 +1658,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
         border-top: 1px solid rgba(148, 163, 184, 0.26);
         background: rgba(255, 255, 255, 0.92);
-        box-shadow: 0 -12px 30px rgba(6, 34, 65, 0.08);
+        box-shadow: 0 -12px 30px rgba(7, 31, 51, 0.08);
         backdrop-filter: blur(18px);
         -webkit-backdrop-filter: blur(18px);
       }
@@ -2853,7 +2853,7 @@ function densityMarkerAnnotations(peaks, meanSteps, meanDensity, meanRounded) {
       step: meanSteps,
       density: meanDensity,
       text: `Average ≈ ${meanRounded}`,
-      borderColor: "rgba(13,111,189,0.62)",
+      borderColor: "rgba(15,99,136,0.62)",
       kind: "average",
     },
   ].sort((a, b) => b.density - a.density);
@@ -3010,21 +3010,21 @@ function compactDensityMarkerAnnotations(peaks, meanSteps, meanDensity, meanRoun
       text: `Average ≈ ${meanRounded}`,
       ax: peakIsRight ? -50 : 50,
       ay: 42,
-      bordercolor: "rgba(13,111,189,0.64)",
-      arrowcolor: "rgba(13,111,189,0.72)",
+      bordercolor: "rgba(15,99,136,0.64)",
+      arrowcolor: "rgba(15,99,136,0.72)",
     },
   ];
 }
 
 const THEME = {
-  ink: "#062241",
-  line: "#cfe8ef",
-  grid: "#e3f1f5",
-  accent: "#0a8f8f",
-  blue: "#0d6fbd",
-  purple: "#053f74",
-  reference: "#7891a3",
-  red: "#d85c57",
+  ink: "#071f33",
+  line: "#d8e8eb",
+  grid: "#e8f1f3",
+  accent: "#0b7876",
+  blue: "#0f6388",
+  purple: "#123a61",
+  reference: "#7f8d98",
+  red: "#c76559",
 };
 
 const HELP_TOPICS = {
