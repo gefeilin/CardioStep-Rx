@@ -463,6 +463,30 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       outline: 3px solid rgba(0, 131, 172, 0.14);
     }
 
+    .unit-panel {
+      display: grid;
+      gap: 7px;
+    }
+
+    .inline-selects {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .bmi-readout-box {
+      display: flex;
+      align-items: center;
+      min-height: 42px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 9px 11px;
+      background: var(--soft);
+      color: var(--ink);
+      font-size: 17px;
+      font-weight: 700;
+    }
+
     .segmented-select {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1438,10 +1462,10 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         right: 12px;
         bottom: max(10px, env(safe-area-inset-bottom));
         z-index: 30;
-        height: min(560px, calc(100vh - 92px));
-        height: min(560px, calc(100dvh - 92px));
-        max-height: min(560px, calc(100vh - 92px));
-        max-height: min(560px, calc(100dvh - 92px));
+        height: min(650px, calc(100vh - 92px));
+        height: min(650px, calc(100dvh - 92px));
+        max-height: min(650px, calc(100vh - 92px));
+        max-height: min(650px, calc(100dvh - 92px));
         overflow: auto;
         padding: 10px 16px 16px;
         border-bottom: 1px solid var(--line);
@@ -1777,11 +1801,46 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
               <input id="glucose" type="number" step="0.01" min="0" placeholder="Impute">
               <span class="field-helper">Fasting preferred, mg/dL</span>
             </label>
-            <label>
-              <span class="field-label">BMI</span>
-              <input id="bmi" type="number" step="0.01" required>
-              <span class="field-helper">kg/m2</span>
-            </label>
+            <div class="field-control">
+              <span class="field-label">Height</span>
+              <div class="segmented-select" role="radiogroup" aria-label="Height unit">
+                <input id="height-unit-cm" name="height-unit" type="radio" value="cm" checked>
+                <label for="height-unit-cm">cm</label>
+                <input id="height-unit-ftin" name="height-unit" type="radio" value="ftin">
+                <label for="height-unit-ftin">ft/in</label>
+              </div>
+              <div id="height-cm-panel" class="unit-panel">
+                <input id="height-cm" type="number" step="0.1" min="1" required>
+              </div>
+              <div id="height-ftin-panel" class="unit-panel" hidden>
+                <div class="inline-selects">
+                  <select id="height-ft" aria-label="Height feet"></select>
+                  <select id="height-in" aria-label="Height inches"></select>
+                </div>
+              </div>
+              <span class="field-helper">cm or ft/in</span>
+            </div>
+            <div class="field-control">
+              <span class="field-label">Weight</span>
+              <div class="segmented-select" role="radiogroup" aria-label="Weight unit">
+                <input id="weight-unit-kg" name="weight-unit" type="radio" value="kg" checked>
+                <label for="weight-unit-kg">kg</label>
+                <input id="weight-unit-lbs" name="weight-unit" type="radio" value="lbs">
+                <label for="weight-unit-lbs">lbs</label>
+              </div>
+              <div id="weight-kg-panel" class="unit-panel">
+                <input id="weight-kg" type="number" step="0.1" min="1" required>
+              </div>
+              <div id="weight-lbs-panel" class="unit-panel" hidden>
+                <input id="weight-lbs" type="number" step="0.1" min="1">
+              </div>
+              <span class="field-helper">BMI calculated automatically</span>
+            </div>
+            <div class="field-control">
+              <span class="field-label">Calculated BMI</span>
+              <div class="bmi-readout-box" id="bmi-readout">--</div>
+              <span class="field-helper">Used internally by the model</span>
+            </div>
           </div>
         </div>
 
@@ -2109,7 +2168,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         <div>
           <div class="action-kicker">Why this plan?</div>
           <div class="action-headline">Based on your health profile.</div>
-          <div class="action-detail" id="why-plan-detail">The recommendation uses age, sex, BMI, blood pressure, and glucose.</div>
+          <div class="action-detail" id="why-plan-detail">The recommendation uses age, sex, calculated BMI from height and weight, blood pressure, and glucose.</div>
         </div>
       </section>
 
@@ -2211,22 +2270,74 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 <script>
 const APP_DATA = {"checkpointName":"Fitted_Q_lambda_spline_v8_with_PM_v7_exagesex_nounderweight_g08_scale0002_0.000215_full_recovered.pth","standardization":{"GLU":{"mean":102.95,"std":28.8},"BMI":{"mean":29.21,"std":5.74},"DBP":{"mean":74.59,"std":9.35},"SBP":{"mean":123.87,"std":15.15},"age_att":{"mean":55.46,"std":14.59}},"sexMapping":{"Male":0.0,"Female":1.0},"stateOrder":["GLU_scaled","BMI_scaled","DBP_scaled","SBP_scaled","age_att_scaled","sex_at_birth","GLU_imputed"],"imputer":{"coef":[0.17071101064605904,-0.09740997671537782,0.1823997352288041,0.09002910722710848,-0.03422901884181218],"intercept":0.02299994038971967,"residualSdScaled":0.9796905486944726,"residualSdRaw":28.21508780240081,"nTrainingRows":217,"features":["BMI_scaled","DBP_scaled","SBP_scaled","age_att_scaled","sex_at_birth"]},"policy":{"coefficients":[[-0.5386607646942139,0.56231290102005,-0.821153461933136,0.8093871474266052,-0.610588550567627,0.2546745240688324],[0.1455242931842804,-0.08769024163484573,0.27758699655532837,-0.12249638140201569,-0.11516523361206055,-0.007809774950146675],[-0.2632519006729126,0.5070765018463135,-0.7651383280754089,0.7077872157096863,-0.4316249489784241,0.11982640624046326],[0.25327497720718384,-0.32155758142471313,0.34087106585502625,-0.4358472526073456,0.21095967292785645,0.0333869569003582],[0.04692382365465164,-0.47961223125457764,0.8495531678199768,-0.722228467464447,0.5215497016906738,-0.19573822617530823],[-0.16608679294586182,-0.04337865486741066,-0.7882119417190552,0.5743793249130249,-0.37674054503440857,0.40231379866600037],[0.060702886432409286,-0.7381318807601929,0.06811000406742096,-1.4656552076339722,-0.13423869013786316,0.9143564701080322]],"basis":[[1.0,0.9118179082870483,0.8289784789085388,0.7513148188591003,0.6786598563194275,0.610846757888794,0.5477085113525391,0.4890781044960022,0.43478864431381226,0.38467317819595337,0.3385647237300873,0.29629629850387573,0.25770097970962524,0.22261179983615875,0.1908617913722992,0.1622840017080307,0.1367114633321762,0.11397723853588104,0.09391435235738754,0.07635584473609924,0.061134763062000275,0.04808414727449417,0.03703703731298447,0.027826474979519844,0.020285500213503838,0.01424715481698513,0.009544480592012405,0.006010518409311771,0.0034783093724399805,0.0017808943521231413,0.0007513148011639714,0.00022261179401539266,2.7826474251924083e-05,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],[0.0,0.08682555705308914,0.16567882895469666,0.2368519902229309,0.30063721537590027,0.3573267161846161,0.40721261501312256,0.4505871534347534,0.48774242401123047,0.5189707279205322,0.5445641279220581,0.5648148059844971,0.5800150036811829,0.5904569029808044,0.596432626247406,0.5982344150543213,0.5961543917655945,0.5904847383499146,0.5815176367759705,0.569545328617096,0.5548598766326904,0.5377535820007324,0.5185185074806213,0.4974469244480133,0.4748309552669525,0.45096278190612793,0.4261346161365509,0.400638610124588,0.3747669458389282,0.3488118052482605,0.3230653703212738,0.2978197932243347,0.2733672857284546,0.25,0.22795447707176208,0.2072446197271347,0.18782870471477509,0.16966496407985687,0.1527116894721985,0.13692712783813477,0.12226952612400055,0.10869716107845306,0.09616829454898834,0.08464118093252182,0.07407407462596893,0.06442524492740631,0.05565294995903969,0.0477154478430748,0.040571000427007675,0.03417786583304405,0.02849430963397026,0.023478588089346886,0.01908896118402481,0.015283690765500069,0.012021036818623543,0.009259259328246117,0.006956618744879961,0.005071375053375959,0.0035617887042462826,0.0023861201480031013,0.0015026296023279428,0.0008695773431099951,0.0004452235880307853,0.00018782870029099286,5.5652948503848165e-05,6.956618562981021e-06,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],[0.0,0.00135190284345299,0.005305581260472536,0.011707988567650318,0.020406080409884453,0.031246811151504517,0.04407713562250137,0.05874400585889816,0.07509437948465347,0.0929752066731453,0.11223344504833221,0.13271604478359222,0.1542699784040451,0.17674216628074646,0.19997958838939667,0.22382919490337372,0.2481379508972168,0.2727527916431427,0.2975206673145294,0.32228854298591614,0.34690338373184204,0.3712121248245239,0.395061731338501,0.41829913854599,0.44077134132385254,0.4623252749443054,0.48280787467956543,0.5020661354064941,0.5199469327926636,0.5362973213195801,0.5509641766548157,0.5637944936752319,0.5746352672576904,0.5833333134651184,0.5897774696350098,0.5940233469009399,0.5961682796478271,0.5963097214698792,0.5945450663566589,0.5909717082977295,0.585686981678009,0.5787883400917053,0.5703731775283813,0.5605388283729553,0.5493826866149902,0.5370022654533386,0.5234948396682739,0.5089578032493591,0.493488609790802,0.47718462347984314,0.46014320850372314,0.4424618184566498,0.42423778772354126,0.40556854009628296,0.38655146956443787,0.3672839403152466,0.3478633761405945,0.32838717103004456,0.3089527189731598,0.2896573543548584,0.27059856057167053,0.251873642206192,0.2335800677537918,0.21581517159938812,0.19867639243602753,0.18226107954978943,0.1666666716337204,0.15196965634822845,0.13816307485103607,0.12521913647651672,0.11310997605323792,0.10180779546499252,0.09128475189208984,0.08151301741600037,0.07246477901935577,0.06411219388246536,0.056427452713251114,0.04938271641731262,0.042950164526700974,0.03710196539759636,0.031810298562049866,0.027047332376241684,0.02278524450957775,0.018996207043528557,0.01565239205956459,0.012725974433124065,0.010189127177000046,0.00801402423530817,0.006172839552164078,0.004637745674699545,0.0033809165470302105,0.0023745258804410696,0.0015907468041405082,0.0010017530294135213,0.0005797182093374431,0.0002968157350551337,0.00012521912867669016,3.710196688189171e-05,4.637745860236464e-06,0.0],[0.0,4.637745860236464e-06,3.710196688189171e-05,0.00012521912867669016,0.0002968157350551337,0.0005797182093374431,0.0010017530294135213,0.0015907468041405082,0.0023745258804410696,0.0033809165470302105,0.004637745674699545,0.006172839552164078,0.00801402423530817,0.010189127177000046,0.012725974433124065,0.01565239205956459,0.018996207043528557,0.02278524450957775,0.027047332376241684,0.031810298562049866,0.03710196539759636,0.042950164526700974,0.04938271641731262,0.056427452713251114,0.06411219388246536,0.07246477901935577,0.08151301741600037,0.09128475189208984,0.10180779546499252,0.11310997605323792,0.12521913647651672,0.13816307485103607,0.15196965634822845,0.1666666716337204,0.18226107954978943,0.19867639243602753,0.21581517159938812,0.2335800677537918,0.251873642206192,0.27059856057167053,0.2896573543548584,0.3089527189731598,0.32838717103004456,0.3478633761405945,0.3672839403152466,0.38655146956443787,0.40556854009628296,0.42423778772354126,0.4424618184566498,0.46014320850372314,0.47718462347984314,0.493488609790802,0.5089578032493591,0.5234948396682739,0.5370022654533386,0.5493826866149902,0.5605388283729553,0.5703731775283813,0.5787883400917053,0.585686981678009,0.5909717082977295,0.5945450663566589,0.5963097214698792,0.5961682796478271,0.5940233469009399,0.5897774696350098,0.5833333134651184,0.5746352672576904,0.5637944936752319,0.5509641766548157,0.5362973213195801,0.5199469327926636,0.5020661354064941,0.48280787467956543,0.4623252749443054,0.44077134132385254,0.41829913854599,0.395061731338501,0.3712121248245239,0.34690338373184204,0.32228854298591614,0.2975206673145294,0.2727527916431427,0.2481379508972168,0.22382919490337372,0.19997958838939667,0.17674216628074646,0.1542699784040451,0.13271604478359222,0.11223344504833221,0.0929752066731453,0.07509437948465347,0.05874400585889816,0.04407713562250137,0.031246811151504517,0.020406080409884453,0.011707988567650318,0.005305581260472536,0.00135190284345299,0.0],[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,6.956618562981021e-06,5.5652948503848165e-05,0.00018782870029099286,0.0004452235880307853,0.0008695773431099951,0.0015026296023279428,0.0023861201480031013,0.0035617887042462826,0.005071375053375959,0.006956618744879961,0.009259259328246117,0.012021036818623543,0.015283690765500069,0.01908896118402481,0.023478588089346886,0.02849430963397026,0.03417786583304405,0.040571000427007675,0.0477154478430748,0.05565294995903969,0.06442524492740631,0.07407407462596893,0.08464118093252182,0.09616829454898834,0.10869716107845306,0.12226952612400055,0.13692712783813477,0.1527116894721985,0.16966496407985687,0.18782870471477509,0.2072446197271347,0.22795447707176208,0.25,0.2733672857284546,0.2978197932243347,0.3230653703212738,0.3488118052482605,0.3747669458389282,0.400638610124588,0.4261346161365509,0.45096278190612793,0.4748309552669525,0.4974469244480133,0.5185185074806213,0.5377535820007324,0.5548598766326904,0.569545328617096,0.5815176367759705,0.5904847383499146,0.5961543917655945,0.5982344150543213,0.596432626247406,0.5904569029808044,0.5800150036811829,0.5648148059844971,0.5445641279220581,0.5189707279205322,0.48774242401123047,0.4505871534347534,0.40721261501312256,0.3573267161846161,0.30063721537590027,0.2368519902229309,0.16567882895469666,0.08682555705308914,0.0],[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.7826474251924083e-05,0.00022261179401539266,0.0007513148011639714,0.0017808943521231413,0.0034783093724399805,0.006010518409311771,0.009544480592012405,0.01424715481698513,0.020285500213503838,0.027826474979519844,0.03703703731298447,0.04808414727449417,0.061134763062000275,0.07635584473609924,0.09391435235738754,0.11397723853588104,0.1367114633321762,0.1622840017080307,0.1908617913722992,0.22261179983615875,0.25770097970962524,0.29629629850387573,0.3385647237300873,0.38467317819595337,0.43478864431381226,0.4890781044960022,0.5477085113525391,0.610846757888794,0.6786598563194275,0.7513148188591003,0.8289784789085388,0.9118179082870483,1.0]]},"supports":{"lqd":[0.0,0.010101010101010102,0.020202020202020204,0.030303030303030304,0.04040404040404041,0.05050505050505051,0.06060606060606061,0.07070707070707072,0.08080808080808081,0.09090909090909091,0.10101010101010102,0.11111111111111112,0.12121212121212122,0.13131313131313133,0.14141414141414144,0.15151515151515152,0.16161616161616163,0.17171717171717174,0.18181818181818182,0.19191919191919193,0.20202020202020204,0.21212121212121213,0.22222222222222224,0.23232323232323235,0.24242424242424243,0.25252525252525254,0.26262626262626265,0.27272727272727276,0.2828282828282829,0.29292929292929293,0.30303030303030304,0.31313131313131315,0.32323232323232326,0.33333333333333337,0.3434343434343435,0.3535353535353536,0.36363636363636365,0.37373737373737376,0.38383838383838387,0.393939393939394,0.4040404040404041,0.4141414141414142,0.42424242424242425,0.43434343434343436,0.4444444444444445,0.4545454545454546,0.4646464646464647,0.4747474747474748,0.48484848484848486,0.494949494949495,0.5050505050505051,0.5151515151515152,0.5252525252525253,0.5353535353535354,0.5454545454545455,0.5555555555555556,0.5656565656565657,0.5757575757575758,0.5858585858585859,0.595959595959596,0.6060606060606061,0.6161616161616162,0.6262626262626263,0.6363636363636365,0.6464646464646465,0.6565656565656566,0.6666666666666667,0.6767676767676768,0.686868686868687,0.696969696969697,0.7070707070707072,0.7171717171717172,0.7272727272727273,0.7373737373737375,0.7474747474747475,0.7575757575757577,0.7676767676767677,0.7777777777777778,0.787878787878788,0.797979797979798,0.8080808080808082,0.8181818181818182,0.8282828282828284,0.8383838383838385,0.8484848484848485,0.8585858585858587,0.8686868686868687,0.8787878787878789,0.888888888888889,0.8989898989898991,0.9090909090909092,0.9191919191919192,0.9292929292929294,0.9393939393939394,0.9494949494949496,0.9595959595959597,0.9696969696969697,0.9797979797979799,0.98989898989899,1.0],"density":[0.0,225.25252525252526,450.5050505050505,675.7575757575758,901.010101010101,1126.2626262626263,1351.5151515151515,1576.767676767677,1802.020202020202,2027.2727272727273,2252.5252525252527,2477.777777777778,2703.030303030303,2928.282828282828,3153.535353535354,3378.787878787879,3604.040404040404,3829.2929292929293,4054.5454545454545,4279.79797979798,4505.050505050505,4730.30303030303,4955.555555555556,5180.808080808081,5406.060606060606,5631.313131313132,5856.565656565656,6081.818181818182,6307.070707070708,6532.323232323232,6757.575757575758,6982.828282828283,7208.080808080808,7433.333333333334,7658.585858585859,7883.838383838384,8109.090909090909,8334.343434343435,8559.59595959596,8784.848484848486,9010.10101010101,9235.353535353535,9460.60606060606,9685.858585858587,9911.111111111111,10136.363636363636,10361.616161616163,10586.868686868687,10812.121212121212,11037.373737373739,11262.626262626263,11487.878787878788,11713.131313131313,11938.38383838384,12163.636363636364,12388.888888888889,12614.141414141415,12839.39393939394,13064.646464646465,13289.898989898991,13515.151515151516,13740.40404040404,13965.656565656565,14190.909090909092,14416.161616161617,14641.414141414141,14866.666666666668,15091.919191919193,15317.171717171717,15542.424242424242,15767.676767676769,15992.929292929293,16218.181818181818,16443.434343434343,16668.68686868687,16893.939393939396,17119.19191919192,17344.444444444445,17569.69696969697,17794.949494949495,18020.20202020202,18245.454545454548,18470.70707070707,18695.959595959597,18921.21212121212,19146.464646464647,19371.717171717173,19596.969696969696,19822.222222222223,20047.47474747475,20272.727272727272,20497.9797979798,20723.232323232325,20948.484848484848,21173.737373737375,21398.9898989899,21624.242424242424,21849.49494949495,22074.747474747477,22300.0]},"glucoseBounds":{"min":53.99,"max":328.55},"dailyStepsSupport":{"min":0.0,"max":22300.0},"subgroupReferenceSampleCount":2000,"exampleRaw":{"glucose":"","bmi":24,"dbp":70,"sbp":115,"age":50,"sex":"Female"}};
 
-function numberOrNull(elementId) {
+const DEFAULT_HEIGHT_CM = 170;
+const POUNDS_PER_KILOGRAM = 2.2046226218;
+
+function numberOrNull(elementId, label = elementId) {
   const raw = document.getElementById(elementId).value.trim();
   if (raw === "") return null;
   const value = Number(raw);
   if (!Number.isFinite(value)) {
-    throw new Error("Invalid numeric input for " + elementId + ".");
+    throw new Error("Invalid numeric input for " + label + ".");
   }
   return value;
 }
 
-function requiredNumber(elementId) {
-  const value = numberOrNull(elementId);
+function requiredNumber(elementId, label = elementId) {
+  const value = numberOrNull(elementId, label);
   if (value === null) {
-    throw new Error("Missing required input: " + elementId + ".");
+    throw new Error("Missing required input: " + label + ".");
   }
   return value;
+}
+
+function formatProfileNumber(value, digits = 1) {
+  return Number(value).toFixed(digits).replace(/\.0$/, "");
+}
+
+function selectedRadioValue(name) {
+  return document.querySelector(`input[name="${name}"]:checked`)?.value;
+}
+
+function feetInchesFromCentimeters(cm) {
+  const totalInches = Math.max(36, Math.min(96, Math.round(cm / 2.54)));
+  return {feet: Math.floor(totalInches / 12), inches: totalInches % 12};
+}
+
+function selectedHeightCentimeters() {
+  if (selectedRadioValue("height-unit") === "ftin") {
+    const feet = Number(document.getElementById("height-ft").value);
+    const inches = Number(document.getElementById("height-in").value);
+    const totalInches = feet * 12 + inches;
+    if (!Number.isFinite(totalInches) || totalInches <= 0) throw new Error("Invalid numeric input for Height.");
+    return totalInches * 2.54;
+  }
+  const heightCm = requiredNumber("height-cm", "Height");
+  if (heightCm <= 0) throw new Error("Invalid numeric input for Height.");
+  return heightCm;
+}
+
+function selectedWeightKilograms() {
+  const weight = selectedRadioValue("weight-unit") === "lbs"
+    ? requiredNumber("weight-lbs", "Weight") / POUNDS_PER_KILOGRAM
+    : requiredNumber("weight-kg", "Weight");
+  if (weight <= 0) throw new Error("Invalid numeric input for Weight.");
+  return weight;
+}
+
+function calculatedBMI() {
+  const heightMeters = selectedHeightCentimeters() / 100;
+  return selectedWeightKilograms() / (heightMeters * heightMeters);
+}
+
+function updateBmiReadout() {
+  const readout = document.getElementById("bmi-readout");
+  if (!readout) return;
+  try {
+    readout.textContent = calculatedBMI().toFixed(1);
+  } catch {
+    readout.textContent = "--";
+  }
 }
 
 function standardize(value, variableName) {
@@ -2298,7 +2409,7 @@ function imputeGlucoseScaled(bmi, dbp, sbp, age, sex) {
 
 function buildState() {
   const glucoseInput = numberOrNull("glucose");
-  const bmi = requiredNumber("bmi");
+  const bmi = calculatedBMI();
   const dbp = requiredNumber("dbp");
   const sbp = requiredNumber("sbp");
   const age = requiredNumber("age");
@@ -2885,7 +2996,7 @@ const HELP_TOPICS = {
   },
   glucoseImputed: {
     title: "Glucose imputed",
-    message: "Glucose was left blank, so the app estimated it from BMI, blood pressure, age, and sex for this research calculation.",
+    message: "Glucose was left blank, so the app estimated it from calculated BMI, blood pressure, age, and sex for this research calculation.",
   },
   glucoseMeasured: {
     title: "Glucose",
@@ -2901,7 +3012,7 @@ const HELP_TOPICS = {
   },
   subgroupAverage: {
     title: "Subgroup average",
-    message: "The gray curve averages recommendations for similar profiles with the same glucose, age, BMI, blood pressure, sex, and glucose-source group.",
+    message: "The gray curve averages recommendations for similar profiles with the same glucose, age, calculated BMI, blood pressure, sex, and glucose-source group.",
   },
 };
 
@@ -3126,7 +3237,7 @@ function renderChart() {
 
 function updateInsight(ctx) {
   const glucoseSource = ctx.result.glucoseImputed ? "estimated glucose" : "measured glucose";
-  setText("why-plan-detail", `The recommendation uses age, sex, BMI, blood pressure, and ${glucoseSource}.`);
+  setText("why-plan-detail", `The recommendation uses age, sex, calculated BMI from height and weight, blood pressure, and ${glucoseSource}.`);
   setText("insight-summary", "A plain-language explanation of how to use this 90-day plan.");
   setText("insight-main", "Use the average daily steps as the main target across the full 90 days.");
   setText("insight-range", "Some days can be lighter and some can be more active; the plan is not a strict daily minimum.");
@@ -3446,7 +3557,7 @@ function updateSubgroup(ctx) {
   const rows = [
     ["Glucose", compactBucketLabel(ctx.subgroup.glucose, ["glucose"])],
     ["Age", compactBucketLabel(ctx.subgroup.age, ["age"])],
-    ["BMI", compactBucketLabel(ctx.subgroup.bmi, ["BMI"])],
+    ["Calculated BMI", compactBucketLabel(ctx.subgroup.bmi, ["BMI"])],
     ["Blood pressure", compactBucketLabel(ctx.subgroup.bp, ["blood pressure"])],
     ["Sex", ctx.result.sex],
     ["Glucose source", source],
@@ -3541,14 +3652,94 @@ function setSex(value) {
   document.getElementById("sex-male").checked = value === "Male";
 }
 
+function populateProfileSelectors() {
+  const feetSelect = document.getElementById("height-ft");
+  const inchSelect = document.getElementById("height-in");
+  if (!feetSelect.options.length) {
+    for (let feet = 3; feet <= 8; feet += 1) {
+      feetSelect.add(new Option(`${feet} ft`, String(feet)));
+    }
+  }
+  if (!inchSelect.options.length) {
+    for (let inches = 0; inches <= 11; inches += 1) {
+      inchSelect.add(new Option(`${inches} in`, String(inches)));
+    }
+  }
+}
+
+function setHeightUnit(unit) {
+  document.getElementById("height-unit-cm").checked = unit === "cm";
+  document.getElementById("height-unit-ftin").checked = unit === "ftin";
+}
+
+function setWeightUnit(unit) {
+  document.getElementById("weight-unit-kg").checked = unit === "kg";
+  document.getElementById("weight-unit-lbs").checked = unit === "lbs";
+}
+
+function updateUnitPanels() {
+  const heightIsImperial = selectedRadioValue("height-unit") === "ftin";
+  const weightIsPounds = selectedRadioValue("weight-unit") === "lbs";
+  document.getElementById("height-cm-panel").hidden = heightIsImperial;
+  document.getElementById("height-ftin-panel").hidden = !heightIsImperial;
+  document.getElementById("height-cm").required = !heightIsImperial;
+  document.getElementById("weight-kg-panel").hidden = weightIsPounds;
+  document.getElementById("weight-lbs-panel").hidden = !weightIsPounds;
+  document.getElementById("weight-kg").required = !weightIsPounds;
+  document.getElementById("weight-lbs").required = weightIsPounds;
+}
+
+function syncHeightFieldsTo(unit) {
+  if (unit === "ftin") {
+    const heightCm = numberOrNull("height-cm", "Height");
+    if (heightCm !== null && heightCm > 0) {
+      const imperial = feetInchesFromCentimeters(heightCm);
+      document.getElementById("height-ft").value = String(imperial.feet);
+      document.getElementById("height-in").value = String(imperial.inches);
+    }
+    return;
+  }
+  const feet = Number(document.getElementById("height-ft").value);
+  const inches = Number(document.getElementById("height-in").value);
+  const totalInches = feet * 12 + inches;
+  if (Number.isFinite(totalInches) && totalInches > 0) {
+    document.getElementById("height-cm").value = formatProfileNumber(totalInches * 2.54, 2);
+  }
+}
+
+function syncWeightFieldsTo(unit) {
+  if (unit === "lbs") {
+    const weightKg = numberOrNull("weight-kg", "Weight");
+    if (weightKg !== null && weightKg > 0) {
+      document.getElementById("weight-lbs").value = formatProfileNumber(weightKg * POUNDS_PER_KILOGRAM, 2);
+    }
+    return;
+  }
+  const weightLbs = numberOrNull("weight-lbs", "Weight");
+  if (weightLbs !== null && weightLbs > 0) {
+    document.getElementById("weight-kg").value = formatProfileNumber(weightLbs / POUNDS_PER_KILOGRAM, 2);
+  }
+}
+
 function resetExample() {
   const example = APP_DATA.exampleRaw;
+  const heightCm = DEFAULT_HEIGHT_CM;
+  const weightKg = example.bmi * Math.pow(heightCm / 100, 2);
+  const imperial = feetInchesFromCentimeters(heightCm);
   document.getElementById("glucose").value = example.glucose;
-  document.getElementById("bmi").value = String(example.bmi);
+  setHeightUnit("cm");
+  setWeightUnit("kg");
+  document.getElementById("height-cm").value = formatProfileNumber(heightCm, 2);
+  document.getElementById("height-ft").value = String(imperial.feet);
+  document.getElementById("height-in").value = String(imperial.inches);
+  document.getElementById("weight-kg").value = formatProfileNumber(weightKg, 2);
+  document.getElementById("weight-lbs").value = formatProfileNumber(weightKg * POUNDS_PER_KILOGRAM, 2);
   document.getElementById("dbp").value = String(example.dbp);
   document.getElementById("sbp").value = String(example.sbp);
   document.getElementById("age").value = String(example.age);
   setSex(example.sex);
+  updateUnitPanels();
+  updateBmiReadout();
   return updatePolicy();
 }
 
@@ -3812,6 +4003,30 @@ document.querySelectorAll("input[name='sex-choice']").forEach((input) => {
   });
 });
 
+document.querySelectorAll("input[name='height-unit']").forEach((input) => {
+  input.addEventListener("change", () => {
+    if (!input.checked) return;
+    syncHeightFieldsTo(input.value);
+    updateUnitPanels();
+    updateBmiReadout();
+  });
+});
+
+document.querySelectorAll("input[name='weight-unit']").forEach((input) => {
+  input.addEventListener("change", () => {
+    if (!input.checked) return;
+    syncWeightFieldsTo(input.value);
+    updateUnitPanels();
+    updateBmiReadout();
+  });
+});
+
+["height-cm", "height-ft", "height-in", "weight-kg", "weight-lbs"].forEach((id) => {
+  const element = document.getElementById(id);
+  element.addEventListener("input", updateBmiReadout);
+  element.addEventListener("change", updateBmiReadout);
+});
+
 document.getElementById("close-profile").addEventListener("click", closeProfilePanel);
 profileBackdrop.addEventListener("click", closeProfilePanel);
 
@@ -3875,6 +4090,7 @@ window.addEventListener("resize", syncResponsiveState);
 window.addEventListener("load", scrollToPageTop);
 window.addEventListener("pageshow", scrollToPageTop);
 mobileViewportQuery.addEventListener?.("change", syncResponsiveState);
+populateProfileSelectors();
 syncProfilePanelVisibility();
 resetExample();
 syncMobileTabPanels();

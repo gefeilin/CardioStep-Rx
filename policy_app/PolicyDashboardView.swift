@@ -40,7 +40,7 @@ struct PolicyDashboardView: View {
     @State private var result: PolicyResult
     @State private var chartMode: PolicyChartMode = .density
     @State private var isShowingProfileEditor = false
-    @State private var profileEditorDetent: PresentationDetent = .height(560)
+    @State private var profileEditorDetent: PresentationDetent = .height(650)
     @State private var isInsightExpanded = false
     @State private var selectedDensityStep: Double?
     @State private var selectedQuantileLevel: Double?
@@ -106,7 +106,7 @@ struct PolicyDashboardView: View {
                         }
                     }
                 }
-                .presentationDetents([.height(560), .large], selection: $profileEditorDetent)
+                .presentationDetents([.height(650), .large], selection: $profileEditorDetent)
                 .presentationDragIndicator(.visible)
             }
         }
@@ -285,17 +285,50 @@ private struct MobileDashboardTabBar: View {
     }
 }
 
-struct ProfileFormState: Equatable {
+private enum HeightUnit: String, CaseIterable, Identifiable {
+    case centimeters = "cm"
+    case feetInches = "ft/in"
+
+    var id: String { rawValue }
+}
+
+private enum WeightUnit: String, CaseIterable, Identifiable {
+    case kilograms = "kg"
+    case pounds = "lbs"
+
+    var id: String { rawValue }
+}
+
+private struct ProfileFormState: Equatable {
+    private static let defaultHeightCm = 170.0
+    private static let poundsPerKilogram = 2.2046226218
+
     var glucose: String
-    var bmi: String
+    var heightUnit: HeightUnit
+    var heightCentimeters: String
+    var heightFeet: Int
+    var heightInches: Int
+    var weightUnit: WeightUnit
+    var weightKilograms: String
+    var weightPounds: String
     var dbp: String
     var sbp: String
     var age: String
     var sex: SexAtBirth
 
     init(example: PolicyModelData.ExampleRaw) {
+        let heightCm = Self.defaultHeightCm
+        let weightKg = example.bmi * pow(heightCm / 100.0, 2)
+        let totalInches = Int((heightCm / 2.54).rounded())
+
         glucose = example.glucose
-        bmi = Self.formatInput(example.bmi)
+        heightUnit = .centimeters
+        heightCentimeters = Self.formatInput(heightCm)
+        heightFeet = max(3, min(8, totalInches / 12))
+        heightInches = max(0, min(11, totalInches % 12))
+        weightUnit = .kilograms
+        weightKilograms = Self.formatInput(weightKg)
+        weightPounds = Self.formatInput(weightKg * Self.poundsPerKilogram)
         dbp = Self.formatInput(example.dbp)
         sbp = Self.formatInput(example.sbp)
         age = Self.formatInput(example.age)
@@ -305,12 +338,27 @@ struct ProfileFormState: Equatable {
     func validatedProfile() throws -> PatientProfile {
         PatientProfile(
             glucose: try optionalNumber(glucose, field: "Glucose"),
-            bmi: try requiredNumber(bmi, field: "BMI"),
+            bmi: try calculatedBMI(),
             dbp: try requiredNumber(dbp, field: "DBP"),
             sbp: try requiredNumber(sbp, field: "SBP"),
             age: try requiredNumber(age, field: "Age"),
             sex: sex
         )
+    }
+
+    var bmiPreviewText: String {
+        guard let bmi = try? calculatedBMI() else { return "--" }
+        return Self.formatBMI(bmi)
+    }
+
+    mutating func convertHeight(from oldUnit: HeightUnit, to newUnit: HeightUnit) {
+        guard oldUnit != newUnit, let heightCm = heightCentimetersValue(using: oldUnit) else { return }
+        setHeightCentimetersValue(heightCm, for: newUnit)
+    }
+
+    mutating func convertWeight(from oldUnit: WeightUnit, to newUnit: WeightUnit) {
+        guard oldUnit != newUnit, let weightKg = weightKilogramsValue(using: oldUnit) else { return }
+        setWeightKilogramsValue(weightKg, for: newUnit)
     }
 
     static func formatInput(_ value: Double) -> String {
@@ -321,6 +369,77 @@ struct ProfileFormState: Equatable {
         formatter.numberStyle = .decimal
         formatter.usesGroupingSeparator = false
         return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
+    }
+
+    private static func formatBMI(_ value: Double) -> String {
+        let formatter = NumberFormatter()
+        formatter.locale = Locale(identifier: "en_US")
+        formatter.maximumFractionDigits = 1
+        formatter.minimumFractionDigits = 1
+        formatter.numberStyle = .decimal
+        formatter.usesGroupingSeparator = false
+        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.1f", value)
+    }
+
+    private func calculatedBMI() throws -> Double {
+        let heightCm = try requiredHeightCentimeters()
+        let weightKg = try requiredWeightKilograms()
+        let heightMeters = heightCm / 100.0
+        return weightKg / pow(heightMeters, 2)
+    }
+
+    private func requiredHeightCentimeters() throws -> Double {
+        guard let heightCm = heightCentimetersValue(using: heightUnit), heightCm > 0 else {
+            throw PolicyError.invalidNumericInput("Height")
+        }
+        return heightCm
+    }
+
+    private func requiredWeightKilograms() throws -> Double {
+        guard let weightKg = weightKilogramsValue(using: weightUnit), weightKg > 0 else {
+            throw PolicyError.invalidNumericInput("Weight")
+        }
+        return weightKg
+    }
+
+    private func heightCentimetersValue(using unit: HeightUnit) -> Double? {
+        switch unit {
+        case .centimeters:
+            return try? requiredNumber(heightCentimeters, field: "Height")
+        case .feetInches:
+            let totalInches = Double(heightFeet * 12 + heightInches)
+            return totalInches > 0 ? totalInches * 2.54 : nil
+        }
+    }
+
+    private mutating func setHeightCentimetersValue(_ value: Double, for unit: HeightUnit) {
+        switch unit {
+        case .centimeters:
+            heightCentimeters = Self.formatInput(value)
+        case .feetInches:
+            let totalInches = max(36, min(96, Int((value / 2.54).rounded())))
+            heightFeet = totalInches / 12
+            heightInches = totalInches % 12
+        }
+    }
+
+    private func weightKilogramsValue(using unit: WeightUnit) -> Double? {
+        switch unit {
+        case .kilograms:
+            return try? requiredNumber(weightKilograms, field: "Weight")
+        case .pounds:
+            guard let pounds = try? requiredNumber(weightPounds, field: "Weight") else { return nil }
+            return pounds / Self.poundsPerKilogram
+        }
+    }
+
+    private mutating func setWeightKilogramsValue(_ value: Double, for unit: WeightUnit) {
+        switch unit {
+        case .kilograms:
+            weightKilograms = Self.formatInput(value)
+        case .pounds:
+            weightPounds = Self.formatInput(value * Self.poundsPerKilogram)
+        }
     }
 
     private func optionalNumber(_ raw: String, field: String) throws -> Double? {
@@ -370,11 +489,9 @@ private struct ProfileEditorPanel: View {
                     placeholder: "Impute",
                     helper: "Fasting preferred, mg/dL"
                 )
-                PolicyTextField(
-                    title: "BMI",
-                    text: $form.bmi,
-                    helper: "kg/m2"
-                )
+                HeightInput(form: $form)
+                WeightInput(form: $form)
+                BMIReadout(value: form.bmiPreviewText)
             }
 
             ProfileSection(title: "Blood Pressure") {
@@ -442,6 +559,12 @@ private struct ProfileEditorPanel: View {
                 .accessibilityLabel("Generate 90-day plan")
             }
         }
+        .onChange(of: form.heightUnit) { oldUnit, newUnit in
+            form.convertHeight(from: oldUnit, to: newUnit)
+        }
+        .onChange(of: form.weightUnit) { oldUnit, newUnit in
+            form.convertWeight(from: oldUnit, to: newUnit)
+        }
     }
 
     private func generate() {
@@ -459,6 +582,137 @@ private struct ProfileEditorPanel: View {
     private func reset() {
         form = ProfileFormState(example: engine.data.exampleRaw)
         generate()
+    }
+}
+
+private struct HeightInput: View {
+    @Binding var form: ProfileFormState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text("Height")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Picker("Height unit", selection: $form.heightUnit) {
+                ForEach(HeightUnit.allCases) { unit in
+                    Text(unit.rawValue).tag(unit)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            if form.heightUnit == .centimeters {
+                TextField("170", text: $form.heightCentimeters)
+                    .profileNumberField()
+            } else {
+                HStack(spacing: 8) {
+                    MenuPicker(title: "ft", selection: $form.heightFeet, values: Array(3...8)) { value in
+                        "\(value) ft"
+                    }
+                    MenuPicker(title: "in", selection: $form.heightInches, values: Array(0...11)) { value in
+                        "\(value) in"
+                    }
+                }
+            }
+
+            Text("cm or ft/in")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+    }
+}
+
+private struct WeightInput: View {
+    @Binding var form: ProfileFormState
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text("Weight")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+
+            Picker("Weight unit", selection: $form.weightUnit) {
+                ForEach(WeightUnit.allCases) { unit in
+                    Text(unit.rawValue).tag(unit)
+                }
+            }
+            .pickerStyle(.segmented)
+
+            TextField(form.weightUnit == .kilograms ? "69.4" : "153", text: activeWeightBinding)
+                .profileNumberField()
+
+            Text("BMI calculated automatically")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+                .minimumScaleFactor(0.78)
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+    }
+
+    private var activeWeightBinding: Binding<String> {
+        switch form.weightUnit {
+        case .kilograms:
+            return $form.weightKilograms
+        case .pounds:
+            return $form.weightPounds
+        }
+    }
+}
+
+private struct BMIReadout: View {
+    let value: String
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 7) {
+            Text("Calculated BMI")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Text(value)
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(AppTheme.ink)
+                .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
+                .padding(.horizontal, 11)
+                .background(AppTheme.background)
+                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8, style: .continuous)
+                        .stroke(AppTheme.line)
+                )
+            Text("Used internally by the model")
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+                .lineLimit(2)
+        }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
+        .accessibilityElement(children: .combine)
+        .accessibilityLabel("Calculated BMI \(value)")
+    }
+}
+
+private struct MenuPicker<SelectionValue: Hashable>: View {
+    let title: String
+    @Binding var selection: SelectionValue
+    let values: [SelectionValue]
+    let label: (SelectionValue) -> String
+
+    var body: some View {
+        Picker(title, selection: $selection) {
+            ForEach(values, id: \.self) { value in
+                Text(label(value)).tag(value)
+            }
+        }
+        .pickerStyle(.menu)
+        .frame(maxWidth: .infinity)
+        .frame(height: 42)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+        .overlay(
+            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                .stroke(AppTheme.line)
+        )
     }
 }
 
@@ -574,7 +828,7 @@ private enum HelpTopic: String, Identifiable {
         case .primaryStepGoal:
             return "The main daily step goal comes from the most concentrated point of the recommended 90-day distribution. It is not a strict daily minimum."
         case .glucoseImputed:
-            return "Glucose was left blank, so the app estimated it from BMI, blood pressure, age, and sex for this research calculation."
+            return "Glucose was left blank, so the app estimated it from calculated BMI, blood pressure, age, and sex for this research calculation."
         case .glucoseMeasured:
             return "The glucose value entered in the profile and used by the recommendation model."
         case .densityFunction:
@@ -582,7 +836,7 @@ private enum HelpTopic: String, Identifiable {
         case .quantileFunction:
             return "This advanced curve shows the recommended daily-step value across quantile levels from 0 to 1."
         case .subgroupAverage:
-            return "The gray curve summarizes recommendations for profiles with similar glucose, age, BMI, blood pressure, sex, and glucose-source group."
+            return "The gray curve summarizes recommendations for profiles with similar glucose, age, calculated BMI, blood pressure, sex, and glucose-source group."
         case .healthTracker:
             return "The iOS app can request HealthKit permission to read Apple Health step counts for the selected 90-day cycle. The Plan match score starts after at least 7 days of data."
         }
@@ -930,7 +1184,7 @@ private struct WhyThisPlanAboutCard: View {
             icon: "person.text.rectangle",
             title: "Why this plan?",
             headline: "Based on your health profile.",
-            detail: "The recommendation uses age, sex, BMI, blood pressure, and \(glucoseSource)."
+            detail: "The recommendation uses age, sex, calculated BMI from height and weight, blood pressure, and \(glucoseSource)."
         )
     }
 }
@@ -2122,7 +2376,7 @@ private struct SubgroupPanel: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 8) {
                 SubgroupPill(label: "Glucose", value: compactBucketLabel(result.subgroup.glucose, removing: ["glucose"]))
                 SubgroupPill(label: "Age", value: compactBucketLabel(result.subgroup.age, removing: ["age"]))
-                SubgroupPill(label: "BMI", value: compactBucketLabel(result.subgroup.bmi, removing: ["BMI"]))
+                SubgroupPill(label: "Calculated BMI", value: compactBucketLabel(result.subgroup.bmi, removing: ["BMI"]))
                 SubgroupPill(label: "Blood pressure", value: compactBucketLabel(result.subgroup.bp, removing: ["blood pressure"]))
                 SubgroupPill(label: "Sex", value: result.subgroup.sex.rawValue)
                 SubgroupPill(label: "Glucose source", value: result.subgroup.glucoseImputed ? "Imputed" : "Measured")
@@ -2172,6 +2426,21 @@ private struct SubgroupPill: View {
 }
 
 private extension View {
+    func profileNumberField() -> some View {
+        self
+            .keyboardType(.decimalPad)
+            .textInputAutocapitalization(.never)
+            .autocorrectionDisabled()
+            .padding(.horizontal, 11)
+            .frame(height: 42)
+            .background(Color.white)
+            .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
+            .overlay(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .stroke(AppTheme.line)
+            )
+    }
+
     func cardStyle() -> some View {
         self
             .padding(14)
