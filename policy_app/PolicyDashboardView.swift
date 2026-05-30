@@ -40,7 +40,7 @@ struct PolicyDashboardView: View {
     @State private var result: PolicyResult
     @State private var chartMode: PolicyChartMode = .density
     @State private var isShowingProfileEditor = false
-    @State private var profileEditorDetent: PresentationDetent = .height(600)
+    @State private var profileEditorDetent: PresentationDetent = .height(680)
     @State private var isInsightExpanded = false
     @State private var selectedDensityStep: Double?
     @State private var selectedQuantileLevel: Double?
@@ -106,7 +106,7 @@ struct PolicyDashboardView: View {
                         }
                     }
                 }
-                .presentationDetents([.height(600), .large], selection: $profileEditorDetent)
+                .presentationDetents([.height(680), .large], selection: $profileEditorDetent)
                 .presentationDragIndicator(.visible)
             }
         }
@@ -169,7 +169,7 @@ struct PolicyDashboardView: View {
     }
 
     private func openProfileEditor() {
-        profileEditorDetent = .height(560)
+        profileEditorDetent = .height(680)
         isShowingProfileEditor = true
     }
 
@@ -455,7 +455,7 @@ private struct ProfileEditorPanel: View {
     @State private var errorMessage: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: 12) {
             if showsHeader {
                 VStack(alignment: .leading, spacing: 4) {
                     Text("Profile")
@@ -501,6 +501,7 @@ private struct ProfileEditorPanel: View {
                     Text("Sex at birth")
                         .font(.caption.weight(.semibold))
                         .foregroundStyle(.secondary)
+                        .frame(height: 28, alignment: .leading)
                     Picker("Sex at birth", selection: $form.sex) {
                         ForEach(SexAtBirth.allCases) { sex in
                             Text(sex.rawValue).tag(sex)
@@ -598,10 +599,12 @@ private struct HeightInput: View {
                 }
             }
 
-            Text("Unit menu")
+            Text("Body height, cm or ft/in")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-                .hidden()
+                .lineLimit(2)
+                .minimumScaleFactor(0.78)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
@@ -625,10 +628,12 @@ private struct WeightInput: View {
             TextField(form.weightUnit == .kilograms ? "69.4" : "153", text: activeWeightBinding)
                 .profileNumberField()
 
-            Text("Unit menu")
+            Text("Body weight, kg or lbs")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-                .hidden()
+                .lineLimit(2)
+                .minimumScaleFactor(0.78)
+                .fixedSize(horizontal: false, vertical: true)
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
@@ -656,6 +661,7 @@ private struct FieldLabelWithUnit<UnitContent: View>: View {
             unit
         }
         .frame(maxWidth: .infinity)
+        .frame(height: 28)
     }
 }
 
@@ -709,11 +715,11 @@ private struct ProfileSection<Content: View>: View {
     @ViewBuilder let content: Content
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 10) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(title)
                 .font(.caption.weight(.bold))
                 .foregroundStyle(AppTheme.green)
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 10) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
                 content
             }
         }
@@ -731,6 +737,7 @@ private struct PolicyTextField: View {
             Text(title)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
+                .frame(height: 28, alignment: .leading)
             TextField(placeholder, text: $text)
                 .keyboardType(.decimalPad)
                 .textInputAutocapitalization(.never)
