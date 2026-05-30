@@ -66,7 +66,7 @@ struct ContentView: View {
 private struct LaunchLoadingView: View {
     @State private var artworkScale = 1.04
     @State private var artworkOpacity = 0.0
-    @State private var dotsAreActive = false
+    @State private var ringIsRotating = false
 
     var body: some View {
         ZStack {
@@ -81,28 +81,27 @@ private struct LaunchLoadingView: View {
                 .ignoresSafeArea()
                 .accessibilityHidden(true)
 
-            LaunchSparkleArc()
-
             VStack {
                 Spacer()
 
-                HStack(spacing: 8) {
-                    ForEach(0..<3, id: \.self) { index in
-                        Circle()
-                            .fill(launchDotColor(for: index))
-                            .frame(width: 7, height: 7)
-                            .scaleEffect(dotsAreActive ? 1.0 : 0.62)
-                            .opacity(dotsAreActive ? 0.95 : 0.45)
-                            .animation(
-                                .easeInOut(duration: 0.64)
-                                .repeatForever(autoreverses: true)
-                                .delay(Double(index) * 0.16),
-                                value: dotsAreActive
-                            )
-                    }
-                }
-                .padding(.horizontal, 18)
-                .padding(.vertical, 12)
+                Circle()
+                    .trim(from: 0.12, to: 0.82)
+                    .stroke(
+                        AngularGradient(
+                            colors: [
+                                Color(red: 0.18, green: 0.72, blue: 0.60),
+                                Color(red: 0.05, green: 0.43, blue: 0.74),
+                                Color(red: 0.18, green: 0.72, blue: 0.60).opacity(0.28)
+                            ],
+                            center: .center
+                        ),
+                        style: StrokeStyle(lineWidth: 3.4, lineCap: .round)
+                    )
+                    .frame(width: 27, height: 27)
+                    .rotationEffect(.degrees(ringIsRotating ? 360 : 0))
+                    .animation(.linear(duration: 0.95).repeatForever(autoreverses: false), value: ringIsRotating)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 10)
                 .background(.white.opacity(0.68), in: Capsule())
                 .overlay(
                     Capsule()
@@ -118,99 +117,8 @@ private struct LaunchLoadingView: View {
                 artworkScale = 1.0
                 artworkOpacity = 1.0
             }
-            dotsAreActive = true
+            ringIsRotating = true
         }
-    }
-
-    private func launchDotColor(for index: Int) -> Color {
-        switch index {
-        case 0:
-            return Color(red: 0.05, green: 0.43, blue: 0.74)
-        case 1:
-            return Color(red: 0.18, green: 0.72, blue: 0.60)
-        default:
-            return Color(red: 0.27, green: 0.55, blue: 0.88)
-        }
-    }
-}
-
-private struct LaunchSparkleArc: View {
-    @State private var progress = 0.0
-
-    var body: some View {
-        GeometryReader { proxy in
-            ZStack {
-                ForEach(1..<5, id: \.self) { index in
-                    Circle()
-                        .fill(trailColor(for: index))
-                        .frame(width: trailSize(for: index), height: trailSize(for: index))
-                        .position(point(for: max(0, progress - Double(index) * 0.052), in: proxy.size))
-                        .opacity(progress > Double(index) * 0.052 ? trailOpacity(for: index) : 0)
-                        .blur(radius: Double(index) * 0.18)
-                }
-
-                Circle()
-                    .fill(Color.white.opacity(0.78))
-                    .frame(width: 28, height: 28)
-                    .blur(radius: 8)
-                    .position(point(for: progress, in: proxy.size))
-
-                Image(systemName: "sparkle")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(
-                        LinearGradient(
-                            colors: [
-                                Color.white,
-                                Color(red: 0.52, green: 0.94, blue: 0.92),
-                                Color(red: 0.05, green: 0.44, blue: 0.77)
-                            ],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        )
-                    )
-                    .shadow(color: Color(red: 0.06, green: 0.58, blue: 0.72).opacity(0.38), radius: 9, x: 0, y: 2)
-                    .rotationEffect(.degrees(progress * 58 - 18))
-                    .scaleEffect(CGFloat(0.82 + 0.2 * sin(progress * .pi)))
-                    .position(point(for: progress, in: proxy.size))
-            }
-        }
-        .allowsHitTesting(false)
-        .accessibilityHidden(true)
-        .onAppear {
-            progress = 0
-            withAnimation(.linear(duration: 1.9).repeatForever(autoreverses: false)) {
-                progress = 1
-            }
-        }
-    }
-
-    private func point(for progress: Double, in size: CGSize) -> CGPoint {
-        let clamped = min(max(progress, 0), 1)
-        let start = 208.0 * .pi / 180.0
-        let end = 332.0 * .pi / 180.0
-        let angle = start + (end - start) * clamped
-        let radiusX = min(size.width * 0.39, size.height * 0.21)
-        let radiusY = radiusX * 0.58
-        let center = CGPoint(x: size.width * 0.5, y: size.height * 0.32)
-
-        return CGPoint(
-            x: center.x + cos(angle) * radiusX,
-            y: center.y + sin(angle) * radiusY
-        )
-    }
-
-    private func trailColor(for index: Int) -> Color {
-        index.isMultiple(of: 2)
-            ? Color(red: 0.52, green: 0.94, blue: 0.92).opacity(0.9)
-            : Color.white.opacity(0.94)
-    }
-
-    private func trailSize(for index: Int) -> CGFloat {
-        CGFloat(max(4, 12 - index * 2))
-    }
-
-    private func trailOpacity(for index: Int) -> Double {
-        max(0.16, 0.58 - Double(index) * 0.1)
     }
 }
 

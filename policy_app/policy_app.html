@@ -142,14 +142,13 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       animation: launchArtworkIn 0.82s ease-out forwards;
     }
 
-    .launch-dots {
+    .launch-loader {
       position: absolute;
       left: 50%;
       bottom: calc(48px + env(safe-area-inset-bottom));
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      padding: 12px 18px;
+      display: grid;
+      place-items: center;
+      padding: 10px 16px;
       border: 1px solid rgba(255, 255, 255, 0.82);
       border-radius: 999px;
       background: rgba(255, 255, 255, 0.68);
@@ -157,38 +156,14 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       transform: translateX(-50%);
     }
 
-    .launch-dot {
-      width: 7px;
-      height: 7px;
+    .launch-ring {
+      width: 27px;
+      height: 27px;
       border-radius: 999px;
-      animation: launchDotPulse 0.64s ease-in-out infinite alternate;
-    }
-
-    .launch-dot:nth-child(1) { background: #0d6fbd; }
-    .launch-dot:nth-child(2) { background: #2eb89a; animation-delay: 0.16s; }
-    .launch-dot:nth-child(3) { background: #468ce0; animation-delay: 0.32s; }
-
-    .launch-sparkle-layer {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-    }
-
-    .launch-sparkle {
-      position: absolute;
-      left: 22%;
-      top: 29%;
-      width: 22px;
-      height: 22px;
-      background: linear-gradient(135deg, #fff 0%, #93f2ec 52%, #0d6fbd 100%);
-      clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 56%, 79% 91%, 50% 70%, 21% 91%, 32% 56%, 2% 35%, 39% 35%);
-      filter:
-        drop-shadow(0 0 10px rgba(50, 203, 209, 0.48))
-        drop-shadow(-16px 9px 8px rgba(117, 233, 220, 0.35))
-        drop-shadow(-30px 16px 10px rgba(255, 255, 255, 0.42));
-      opacity: 0;
-      transform: translate(-50%, -50%) scale(0.72) rotate(-18deg);
-      animation: launchSparkleArc 1.9s cubic-bezier(0.2, 0.74, 0.2, 1) infinite;
+      border: 3.4px solid rgba(46, 184, 154, 0.22);
+      border-top-color: #0d6fbd;
+      border-right-color: #2eb89a;
+      animation: launchRingSpin 0.95s linear infinite;
     }
 
     @keyframes launchArtworkIn {
@@ -198,48 +173,13 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       }
     }
 
-    @keyframes launchDotPulse {
-      from {
-        opacity: 0.45;
-        transform: scale(0.62);
-      }
-      to {
-        opacity: 0.95;
-        transform: scale(1);
-      }
-    }
-
-    @keyframes launchSparkleArc {
-      0% {
-        left: 22%;
-        top: 29%;
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.68) rotate(-18deg);
-      }
-      12% {
-        opacity: 1;
-      }
-      50% {
-        left: 50%;
-        top: 15.5%;
-        opacity: 1;
-        transform: translate(-50%, -50%) scale(1.08) rotate(20deg);
-      }
-      88% {
-        opacity: 1;
-      }
-      100% {
-        left: 78%;
-        top: 29%;
-        opacity: 0;
-        transform: translate(-50%, -50%) scale(0.82) rotate(54deg);
-      }
+    @keyframes launchRingSpin {
+      to { transform: rotate(360deg); }
     }
 
     @media (prefers-reduced-motion: reduce) {
       .launch-artwork,
-      .launch-dot,
-      .launch-sparkle {
+      .launch-ring {
         animation: none;
         opacity: 1;
         transform: none;
@@ -1776,13 +1716,8 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 <body>
 <div class="app-launch-screen" id="app-launch-screen" role="status" aria-label="Loading CardioStepRx">
   <img class="launch-artwork" src="lauch.png" alt="">
-  <div class="launch-sparkle-layer" aria-hidden="true">
-    <span class="launch-sparkle"></span>
-  </div>
-  <div class="launch-dots" aria-hidden="true">
-    <span class="launch-dot"></span>
-    <span class="launch-dot"></span>
-    <span class="launch-dot"></span>
+  <div class="launch-loader" aria-hidden="true">
+    <span class="launch-ring"></span>
   </div>
 </div>
 <svg class="icon-sprite" aria-hidden="true" focusable="false">
