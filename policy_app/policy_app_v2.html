@@ -463,9 +463,20 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       outline: 3px solid rgba(0, 131, 172, 0.14);
     }
 
-    .unit-panel {
-      display: grid;
-      gap: 7px;
+    .field-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      min-height: 28px;
+    }
+
+    .unit-value-panel {
+      min-width: 0;
+    }
+
+    .unit-value-panel[hidden] {
+      display: none;
     }
 
     .inline-selects {
@@ -474,17 +485,43 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       gap: 8px;
     }
 
-    .bmi-readout-box {
-      display: flex;
-      align-items: center;
-      min-height: 42px;
+    .compact-unit-switch {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2px;
+      width: 112px;
+      min-width: 96px;
+      padding: 2px;
       border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 9px 11px;
-      background: var(--soft);
+      border-radius: 7px;
+      background: #eef5fa;
+    }
+
+    .compact-unit-switch.weight {
+      width: 100px;
+    }
+
+    .compact-unit-switch input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .compact-unit-switch label {
+      display: grid;
+      place-items: center;
+      min-height: 22px;
+      border-radius: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      font-weight: 800;
+      line-height: 1;
+    }
+
+    .compact-unit-switch input:checked + label {
       color: var(--ink);
-      font-size: 17px;
-      font-weight: 700;
+      background: #fff;
+      box-shadow: 0 1px 3px rgba(9, 26, 52, 0.10);
     }
 
     .segmented-select {
@@ -1462,10 +1499,10 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         right: 12px;
         bottom: max(10px, env(safe-area-inset-bottom));
         z-index: 30;
-        height: min(650px, calc(100vh - 92px));
-        height: min(650px, calc(100dvh - 92px));
-        max-height: min(650px, calc(100vh - 92px));
-        max-height: min(650px, calc(100dvh - 92px));
+        height: min(600px, calc(100vh - 92px));
+        height: min(600px, calc(100dvh - 92px));
+        max-height: min(600px, calc(100vh - 92px));
+        max-height: min(600px, calc(100dvh - 92px));
         overflow: auto;
         padding: 10px 16px 16px;
         border-bottom: 1px solid var(--line);
@@ -1802,44 +1839,43 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
               <span class="field-helper">Fasting preferred, mg/dL</span>
             </label>
             <div class="field-control">
-              <span class="field-label">Height</span>
-              <div class="segmented-select" role="radiogroup" aria-label="Height unit">
-                <input id="height-unit-cm" name="height-unit" type="radio" value="cm" checked>
-                <label for="height-unit-cm">cm</label>
-                <input id="height-unit-ftin" name="height-unit" type="radio" value="ftin">
-                <label for="height-unit-ftin">ft/in</label>
+              <div class="field-label-row">
+                <span class="field-label">Height</span>
+                <div class="compact-unit-switch" role="radiogroup" aria-label="Height unit">
+                  <input id="height-unit-cm" name="height-unit" type="radio" value="cm" checked>
+                  <label for="height-unit-cm">cm</label>
+                  <input id="height-unit-ftin" name="height-unit" type="radio" value="ftin">
+                  <label for="height-unit-ftin">ft/in</label>
+                </div>
               </div>
-              <div id="height-cm-panel" class="unit-panel">
+              <div id="height-cm-panel" class="unit-value-panel">
                 <input id="height-cm" type="number" step="0.1" min="1" required>
               </div>
-              <div id="height-ftin-panel" class="unit-panel" hidden>
+              <div id="height-ftin-panel" class="unit-value-panel" hidden>
                 <div class="inline-selects">
                   <select id="height-ft" aria-label="Height feet"></select>
                   <select id="height-in" aria-label="Height inches"></select>
                 </div>
               </div>
-              <span class="field-helper">cm or ft/in</span>
+              <span class="field-helper invisible">Unit menu</span>
             </div>
             <div class="field-control">
-              <span class="field-label">Weight</span>
-              <div class="segmented-select" role="radiogroup" aria-label="Weight unit">
-                <input id="weight-unit-kg" name="weight-unit" type="radio" value="kg" checked>
-                <label for="weight-unit-kg">kg</label>
-                <input id="weight-unit-lbs" name="weight-unit" type="radio" value="lbs">
-                <label for="weight-unit-lbs">lbs</label>
+              <div class="field-label-row">
+                <span class="field-label">Weight</span>
+                <div class="compact-unit-switch weight" role="radiogroup" aria-label="Weight unit">
+                  <input id="weight-unit-kg" name="weight-unit" type="radio" value="kg" checked>
+                  <label for="weight-unit-kg">kg</label>
+                  <input id="weight-unit-lbs" name="weight-unit" type="radio" value="lbs">
+                  <label for="weight-unit-lbs">lbs</label>
+                </div>
               </div>
-              <div id="weight-kg-panel" class="unit-panel">
+              <div id="weight-kg-panel" class="unit-value-panel">
                 <input id="weight-kg" type="number" step="0.1" min="1" required>
               </div>
-              <div id="weight-lbs-panel" class="unit-panel" hidden>
+              <div id="weight-lbs-panel" class="unit-value-panel" hidden>
                 <input id="weight-lbs" type="number" step="0.1" min="1">
               </div>
-              <span class="field-helper">BMI calculated automatically</span>
-            </div>
-            <div class="field-control">
-              <span class="field-label">Calculated BMI</span>
-              <div class="bmi-readout-box" id="bmi-readout">--</div>
-              <span class="field-helper">Used internally by the model</span>
+              <span class="field-helper invisible">Unit menu</span>
             </div>
           </div>
         </div>
@@ -2168,7 +2204,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         <div>
           <div class="action-kicker">Why this plan?</div>
           <div class="action-headline">Based on your health profile.</div>
-          <div class="action-detail" id="why-plan-detail">The recommendation uses age, sex, calculated BMI from height and weight, blood pressure, and glucose.</div>
+          <div class="action-detail" id="why-plan-detail">The recommendation uses age, sex, height, weight, blood pressure, and glucose.</div>
         </div>
       </section>
 
@@ -2296,7 +2332,7 @@ function formatProfileNumber(value, digits = 1) {
 }
 
 function selectedRadioValue(name) {
-  return document.querySelector(`input[name="${name}"]:checked`)?.value;
+  return document.querySelector(`input[name="${name}"]:checked`)?.value || document.getElementById(name)?.value;
 }
 
 function feetInchesFromCentimeters(cm) {
@@ -2328,16 +2364,6 @@ function selectedWeightKilograms() {
 function calculatedBMI() {
   const heightMeters = selectedHeightCentimeters() / 100;
   return selectedWeightKilograms() / (heightMeters * heightMeters);
-}
-
-function updateBmiReadout() {
-  const readout = document.getElementById("bmi-readout");
-  if (!readout) return;
-  try {
-    readout.textContent = calculatedBMI().toFixed(1);
-  } catch {
-    readout.textContent = "--";
-  }
 }
 
 function standardize(value, variableName) {
@@ -2996,7 +3022,7 @@ const HELP_TOPICS = {
   },
   glucoseImputed: {
     title: "Glucose imputed",
-    message: "Glucose was left blank, so the app estimated it from calculated BMI, blood pressure, age, and sex for this research calculation.",
+    message: "Glucose was left blank, so the app estimated it from height, weight, blood pressure, age, and sex for this research calculation.",
   },
   glucoseMeasured: {
     title: "Glucose",
@@ -3012,7 +3038,7 @@ const HELP_TOPICS = {
   },
   subgroupAverage: {
     title: "Subgroup average",
-    message: "The gray curve averages recommendations for similar profiles with the same glucose, age, calculated BMI, blood pressure, sex, and glucose-source group.",
+    message: "The gray curve averages recommendations for similar profiles with the same glucose, age, BMI, blood pressure, sex, and glucose-source group.",
   },
 };
 
@@ -3237,7 +3263,7 @@ function renderChart() {
 
 function updateInsight(ctx) {
   const glucoseSource = ctx.result.glucoseImputed ? "estimated glucose" : "measured glucose";
-  setText("why-plan-detail", `The recommendation uses age, sex, calculated BMI from height and weight, blood pressure, and ${glucoseSource}.`);
+  setText("why-plan-detail", `The recommendation uses age, sex, height, weight, blood pressure, and ${glucoseSource}.`);
   setText("insight-summary", "A plain-language explanation of how to use this 90-day plan.");
   setText("insight-main", "Use the average daily steps as the main target across the full 90 days.");
   setText("insight-range", "Some days can be lighter and some can be more active; the plan is not a strict daily minimum.");
@@ -3557,7 +3583,7 @@ function updateSubgroup(ctx) {
   const rows = [
     ["Glucose", compactBucketLabel(ctx.subgroup.glucose, ["glucose"])],
     ["Age", compactBucketLabel(ctx.subgroup.age, ["age"])],
-    ["Calculated BMI", compactBucketLabel(ctx.subgroup.bmi, ["BMI"])],
+    ["BMI", compactBucketLabel(ctx.subgroup.bmi, ["BMI"])],
     ["Blood pressure", compactBucketLabel(ctx.subgroup.bp, ["blood pressure"])],
     ["Sex", ctx.result.sex],
     ["Glucose source", source],
@@ -3739,7 +3765,6 @@ function resetExample() {
   document.getElementById("age").value = String(example.age);
   setSex(example.sex);
   updateUnitPanels();
-  updateBmiReadout();
   return updatePolicy();
 }
 
@@ -4008,7 +4033,6 @@ document.querySelectorAll("input[name='height-unit']").forEach((input) => {
     if (!input.checked) return;
     syncHeightFieldsTo(input.value);
     updateUnitPanels();
-    updateBmiReadout();
   });
 });
 
@@ -4017,14 +4041,7 @@ document.querySelectorAll("input[name='weight-unit']").forEach((input) => {
     if (!input.checked) return;
     syncWeightFieldsTo(input.value);
     updateUnitPanels();
-    updateBmiReadout();
   });
-});
-
-["height-cm", "height-ft", "height-in", "weight-kg", "weight-lbs"].forEach((id) => {
-  const element = document.getElementById(id);
-  element.addEventListener("input", updateBmiReadout);
-  element.addEventListener("change", updateBmiReadout);
 });
 
 document.getElementById("close-profile").addEventListener("click", closeProfilePanel);

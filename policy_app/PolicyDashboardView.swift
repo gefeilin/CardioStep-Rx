@@ -40,7 +40,7 @@ struct PolicyDashboardView: View {
     @State private var result: PolicyResult
     @State private var chartMode: PolicyChartMode = .density
     @State private var isShowingProfileEditor = false
-    @State private var profileEditorDetent: PresentationDetent = .height(650)
+    @State private var profileEditorDetent: PresentationDetent = .height(600)
     @State private var isInsightExpanded = false
     @State private var selectedDensityStep: Double?
     @State private var selectedQuantileLevel: Double?
@@ -106,7 +106,7 @@ struct PolicyDashboardView: View {
                         }
                     }
                 }
-                .presentationDetents([.height(650), .large], selection: $profileEditorDetent)
+                .presentationDetents([.height(600), .large], selection: $profileEditorDetent)
                 .presentationDragIndicator(.visible)
             }
         }
@@ -346,11 +346,6 @@ private struct ProfileFormState: Equatable {
         )
     }
 
-    var bmiPreviewText: String {
-        guard let bmi = try? calculatedBMI() else { return "--" }
-        return Self.formatBMI(bmi)
-    }
-
     mutating func convertHeight(from oldUnit: HeightUnit, to newUnit: HeightUnit) {
         guard oldUnit != newUnit, let heightCm = heightCentimetersValue(using: oldUnit) else { return }
         setHeightCentimetersValue(heightCm, for: newUnit)
@@ -369,16 +364,6 @@ private struct ProfileFormState: Equatable {
         formatter.numberStyle = .decimal
         formatter.usesGroupingSeparator = false
         return formatter.string(from: NSNumber(value: value)) ?? "\(value)"
-    }
-
-    private static func formatBMI(_ value: Double) -> String {
-        let formatter = NumberFormatter()
-        formatter.locale = Locale(identifier: "en_US")
-        formatter.maximumFractionDigits = 1
-        formatter.minimumFractionDigits = 1
-        formatter.numberStyle = .decimal
-        formatter.usesGroupingSeparator = false
-        return formatter.string(from: NSNumber(value: value)) ?? String(format: "%.1f", value)
     }
 
     private func calculatedBMI() throws -> Double {
@@ -491,7 +476,6 @@ private struct ProfileEditorPanel: View {
                 )
                 HeightInput(form: $form)
                 WeightInput(form: $form)
-                BMIReadout(value: form.bmiPreviewText)
             }
 
             ProfileSection(title: "Blood Pressure") {
@@ -590,35 +574,34 @@ private struct HeightInput: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
-            Text("Height")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-
-            Picker("Height unit", selection: $form.heightUnit) {
-                ForEach(HeightUnit.allCases) { unit in
-                    Text(unit.rawValue).tag(unit)
+            FieldLabelWithUnit(title: "Height") {
+                CompactUnitPicker(
+                    selection: $form.heightUnit,
+                    values: HeightUnit.allCases,
+                    width: 112
+                ) { unit in
+                    unit.rawValue
                 }
             }
-            .pickerStyle(.segmented)
 
             if form.heightUnit == .centimeters {
                 TextField("170", text: $form.heightCentimeters)
                     .profileNumberField()
             } else {
                 HStack(spacing: 8) {
-                    MenuPicker(title: "ft", selection: $form.heightFeet, values: Array(3...8)) { value in
+                    InlineMenuPicker(title: "Feet", selection: $form.heightFeet, values: Array(3...8)) { value in
                         "\(value) ft"
                     }
-                    MenuPicker(title: "in", selection: $form.heightInches, values: Array(0...11)) { value in
+                    InlineMenuPicker(title: "Inches", selection: $form.heightInches, values: Array(0...11)) { value in
                         "\(value) in"
                     }
                 }
             }
 
-            Text("cm or ft/in")
+            Text("Unit menu")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-                .lineLimit(2)
+                .hidden()
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
@@ -629,25 +612,23 @@ private struct WeightInput: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 7) {
-            Text("Weight")
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
-
-            Picker("Weight unit", selection: $form.weightUnit) {
-                ForEach(WeightUnit.allCases) { unit in
-                    Text(unit.rawValue).tag(unit)
+            FieldLabelWithUnit(title: "Weight") {
+                CompactUnitPicker(
+                    selection: $form.weightUnit,
+                    values: WeightUnit.allCases,
+                    width: 102
+                ) { unit in
+                    unit.rawValue
                 }
             }
-            .pickerStyle(.segmented)
 
             TextField(form.weightUnit == .kilograms ? "69.4" : "153", text: activeWeightBinding)
                 .profileNumberField()
 
-            Text("BMI calculated automatically")
+            Text("Unit menu")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
-                .lineLimit(2)
-                .minimumScaleFactor(0.78)
+                .hidden()
         }
         .frame(maxWidth: .infinity, alignment: .topLeading)
     }
@@ -662,37 +643,41 @@ private struct WeightInput: View {
     }
 }
 
-private struct BMIReadout: View {
-    let value: String
+private struct FieldLabelWithUnit<UnitContent: View>: View {
+    let title: String
+    @ViewBuilder let unit: UnitContent
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 7) {
-            Text("Calculated BMI")
+        HStack(spacing: 8) {
+            Text(title)
                 .font(.caption.weight(.semibold))
                 .foregroundStyle(.secondary)
-            Text(value)
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(AppTheme.ink)
-                .frame(maxWidth: .infinity, minHeight: 42, alignment: .leading)
-                .padding(.horizontal, 11)
-                .background(AppTheme.background)
-                .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 8, style: .continuous)
-                        .stroke(AppTheme.line)
-                )
-            Text("Used internally by the model")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-                .lineLimit(2)
+            Spacer(minLength: 8)
+            unit
         }
-        .frame(maxWidth: .infinity, alignment: .topLeading)
-        .accessibilityElement(children: .combine)
-        .accessibilityLabel("Calculated BMI \(value)")
+        .frame(maxWidth: .infinity)
     }
 }
 
-private struct MenuPicker<SelectionValue: Hashable>: View {
+private struct CompactUnitPicker<SelectionValue: Hashable>: View {
+    @Binding var selection: SelectionValue
+    let values: [SelectionValue]
+    let width: CGFloat
+    let label: (SelectionValue) -> String
+
+    var body: some View {
+        Picker("", selection: $selection) {
+            ForEach(values, id: \.self) { value in
+                Text(label(value)).tag(value)
+            }
+        }
+        .pickerStyle(.segmented)
+        .labelsHidden()
+        .frame(width: width, height: 28)
+    }
+}
+
+private struct InlineMenuPicker<SelectionValue: Hashable>: View {
     let title: String
     @Binding var selection: SelectionValue
     let values: [SelectionValue]
@@ -705,6 +690,8 @@ private struct MenuPicker<SelectionValue: Hashable>: View {
             }
         }
         .pickerStyle(.menu)
+        .labelsHidden()
+        .tint(AppTheme.ink)
         .frame(maxWidth: .infinity)
         .frame(height: 42)
         .background(Color.white)
@@ -713,6 +700,7 @@ private struct MenuPicker<SelectionValue: Hashable>: View {
             RoundedRectangle(cornerRadius: 8, style: .continuous)
                 .stroke(AppTheme.line)
         )
+        .accessibilityLabel(title)
     }
 }
 
@@ -828,7 +816,7 @@ private enum HelpTopic: String, Identifiable {
         case .primaryStepGoal:
             return "The main daily step goal comes from the most concentrated point of the recommended 90-day distribution. It is not a strict daily minimum."
         case .glucoseImputed:
-            return "Glucose was left blank, so the app estimated it from calculated BMI, blood pressure, age, and sex for this research calculation."
+            return "Glucose was left blank, so the app estimated it from height, weight, blood pressure, age, and sex for this research calculation."
         case .glucoseMeasured:
             return "The glucose value entered in the profile and used by the recommendation model."
         case .densityFunction:
@@ -836,7 +824,7 @@ private enum HelpTopic: String, Identifiable {
         case .quantileFunction:
             return "This advanced curve shows the recommended daily-step value across quantile levels from 0 to 1."
         case .subgroupAverage:
-            return "The gray curve summarizes recommendations for profiles with similar glucose, age, calculated BMI, blood pressure, sex, and glucose-source group."
+            return "The gray curve summarizes recommendations for profiles with similar glucose, age, BMI, blood pressure, sex, and glucose-source group."
         case .healthTracker:
             return "The iOS app can request HealthKit permission to read Apple Health step counts for the selected 90-day cycle. The Plan match score starts after at least 7 days of data."
         }
@@ -1184,7 +1172,7 @@ private struct WhyThisPlanAboutCard: View {
             icon: "person.text.rectangle",
             title: "Why this plan?",
             headline: "Based on your health profile.",
-            detail: "The recommendation uses age, sex, calculated BMI from height and weight, blood pressure, and \(glucoseSource)."
+            detail: "The recommendation uses age, sex, height, weight, blood pressure, and \(glucoseSource)."
         )
     }
 }
@@ -2376,7 +2364,7 @@ private struct SubgroupPanel: View {
             LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], alignment: .leading, spacing: 8) {
                 SubgroupPill(label: "Glucose", value: compactBucketLabel(result.subgroup.glucose, removing: ["glucose"]))
                 SubgroupPill(label: "Age", value: compactBucketLabel(result.subgroup.age, removing: ["age"]))
-                SubgroupPill(label: "Calculated BMI", value: compactBucketLabel(result.subgroup.bmi, removing: ["BMI"]))
+                SubgroupPill(label: "BMI", value: compactBucketLabel(result.subgroup.bmi, removing: ["BMI"]))
                 SubgroupPill(label: "Blood pressure", value: compactBucketLabel(result.subgroup.bp, removing: ["blood pressure"]))
                 SubgroupPill(label: "Sex", value: result.subgroup.sex.rawValue)
                 SubgroupPill(label: "Glucose source", value: result.subgroup.glucoseImputed ? "Imputed" : "Measured")
