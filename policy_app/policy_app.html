@@ -2347,7 +2347,10 @@ function requiredNumber(elementId, label = elementId) {
 }
 
 function formatProfileNumber(value, digits = 1) {
-  return Number(value).toFixed(digits).replace(/\.0$/, "");
+  return Number(value)
+    .toFixed(digits)
+    .replace(/(\.\d*?)0+$/, "$1")
+    .replace(/\.$/, "");
 }
 
 function selectedRadioValue(name) {
@@ -3769,16 +3772,16 @@ function syncWeightFieldsTo(unit) {
 function resetExample() {
   const example = APP_DATA.exampleRaw;
   const heightCm = DEFAULT_HEIGHT_CM;
-  const weightKg = example.bmi * Math.pow(heightCm / 100, 2);
+  const weightKg = Math.round(example.bmi * Math.pow(heightCm / 100, 2));
   const imperial = feetInchesFromCentimeters(heightCm);
   document.getElementById("glucose").value = example.glucose;
   setHeightUnit("cm");
   setWeightUnit("kg");
-  document.getElementById("height-cm").value = formatProfileNumber(heightCm, 2);
+  document.getElementById("height-cm").value = formatProfileNumber(heightCm, 0);
   document.getElementById("height-ft").value = String(imperial.feet);
   document.getElementById("height-in").value = String(imperial.inches);
-  document.getElementById("weight-kg").value = formatProfileNumber(weightKg, 2);
-  document.getElementById("weight-lbs").value = formatProfileNumber(weightKg * POUNDS_PER_KILOGRAM, 2);
+  document.getElementById("weight-kg").value = formatProfileNumber(weightKg, 0);
+  document.getElementById("weight-lbs").value = formatProfileNumber(Math.round(weightKg * POUNDS_PER_KILOGRAM), 0);
   document.getElementById("dbp").value = String(example.dbp);
   document.getElementById("sbp").value = String(example.sbp);
   document.getElementById("age").value = String(example.age);

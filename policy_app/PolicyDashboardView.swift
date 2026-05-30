@@ -318,7 +318,7 @@ private struct ProfileFormState: Equatable {
 
     init(example: PolicyModelData.ExampleRaw) {
         let heightCm = Self.defaultHeightCm
-        let weightKg = example.bmi * pow(heightCm / 100.0, 2)
+        let weightKg = (example.bmi * pow(heightCm / 100.0, 2)).rounded()
         let totalInches = Int((heightCm / 2.54).rounded())
 
         glucose = example.glucose
@@ -328,7 +328,7 @@ private struct ProfileFormState: Equatable {
         heightInches = max(0, min(11, totalInches % 12))
         weightUnit = .kilograms
         weightKilograms = Self.formatInput(weightKg)
-        weightPounds = Self.formatInput(weightKg * Self.poundsPerKilogram)
+        weightPounds = Self.formatInput((weightKg * Self.poundsPerKilogram).rounded())
         dbp = Self.formatInput(example.dbp)
         sbp = Self.formatInput(example.sbp)
         age = Self.formatInput(example.age)
@@ -625,7 +625,7 @@ private struct WeightInput: View {
                 }
             }
 
-            TextField(form.weightUnit == .kilograms ? "69.4" : "153", text: activeWeightBinding)
+            TextField(form.weightUnit == .kilograms ? "69" : "152", text: activeWeightBinding)
                 .profileNumberField()
 
             Text("Body weight, kg or lbs")
