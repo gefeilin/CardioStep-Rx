@@ -336,12 +336,18 @@ private struct ProfileFormState: Equatable {
     }
 
     func validatedProfile() throws -> PatientProfile {
-        PatientProfile(
-            glucose: try optionalNumber(glucose, field: "Glucose"),
+        let dbpValue = try requiredNonNegativeNumber(dbp, field: "DBP")
+        let sbpValue = try requiredNonNegativeNumber(sbp, field: "SBP")
+        guard dbpValue <= sbpValue else {
+            throw PolicyError.diastolicGreaterThanSystolic
+        }
+
+        return PatientProfile(
+            glucose: try optionalNonNegativeNumber(glucose, field: "Glucose"),
             bmi: try calculatedBMI(),
-            dbp: try requiredNumber(dbp, field: "DBP"),
-            sbp: try requiredNumber(sbp, field: "SBP"),
-            age: try requiredNumber(age, field: "Age"),
+            dbp: dbpValue,
+            sbp: sbpValue,
+            age: try requiredNonNegativeNumber(age, field: "Age"),
             sex: sex
         )
     }
@@ -375,14 +381,14 @@ private struct ProfileFormState: Equatable {
 
     private func requiredHeightCentimeters() throws -> Double {
         guard let heightCm = heightCentimetersValue(using: heightUnit), heightCm > 0 else {
-            throw PolicyError.invalidNumericInput("Height")
+            throw PolicyError.positiveNumericInput("Height")
         }
         return heightCm
     }
 
     private func requiredWeightKilograms() throws -> Double {
         guard let weightKg = weightKilogramsValue(using: weightUnit), weightKg > 0 else {
-            throw PolicyError.invalidNumericInput("Weight")
+            throw PolicyError.positiveNumericInput("Weight")
         }
         return weightKg
     }
@@ -439,6 +445,22 @@ private struct ProfileFormState: Equatable {
     private func requiredNumber(_ raw: String, field: String) throws -> Double {
         guard let value = try optionalNumber(raw, field: field) else {
             throw PolicyError.missingRequiredField(field)
+        }
+        return value
+    }
+
+    private func optionalNonNegativeNumber(_ raw: String, field: String) throws -> Double? {
+        guard let value = try optionalNumber(raw, field: field) else { return nil }
+        guard value >= 0 else {
+            throw PolicyError.negativeNumericInput(field)
+        }
+        return value
+    }
+
+    private func requiredNonNegativeNumber(_ raw: String, field: String) throws -> Double {
+        let value = try requiredNumber(raw, field: field)
+        guard value >= 0 else {
+            throw PolicyError.negativeNumericInput(field)
         }
         return value
     }

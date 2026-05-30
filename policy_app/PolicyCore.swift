@@ -98,6 +98,9 @@ enum PolicyError: LocalizedError, Equatable {
     case invalidModelData(String)
     case missingRequiredField(String)
     case invalidNumericInput(String)
+    case negativeNumericInput(String)
+    case positiveNumericInput(String)
+    case diastolicGreaterThanSystolic
     case unknownSex(String)
 
     var errorDescription: String? {
@@ -110,6 +113,12 @@ enum PolicyError: LocalizedError, Equatable {
             return "Missing required input: \(field)."
         case .invalidNumericInput(let field):
             return "Invalid numeric input for \(field)."
+        case .negativeNumericInput(let field):
+            return "\(field) must be non-negative."
+        case .positiveNumericInput(let field):
+            return "\(field) must be greater than 0."
+        case .diastolicGreaterThanSystolic:
+            return "DBP should not be greater than SBP."
         case .unknownSex(let value):
             return "Unknown sex at birth: \(value)."
         }

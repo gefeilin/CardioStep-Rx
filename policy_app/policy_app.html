@@ -1845,7 +1845,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
           <div class="field-grid">
             <label>
               <span class="field-label">Glucose</span>
-              <input id="glucose" type="number" step="0.01" min="0" placeholder="Impute">
+              <input id="glucose" type="number" step="any" min="0" placeholder="Impute">
               <span class="field-helper">Fasting preferred, mg/dL</span>
             </label>
             <div class="field-control">
@@ -1859,7 +1859,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
                 </div>
               </div>
               <div id="height-cm-panel" class="unit-value-panel">
-                <input id="height-cm" type="number" step="0.1" min="1" required>
+                <input id="height-cm" type="number" step="any" min="0" required>
               </div>
               <div id="height-ftin-panel" class="unit-value-panel" hidden>
                 <div class="inline-selects">
@@ -1880,10 +1880,10 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
                 </div>
               </div>
               <div id="weight-kg-panel" class="unit-value-panel">
-                <input id="weight-kg" type="number" step="0.1" min="1" required>
+                <input id="weight-kg" type="number" step="any" min="0" required>
               </div>
               <div id="weight-lbs-panel" class="unit-value-panel" hidden>
-                <input id="weight-lbs" type="number" step="0.1" min="1">
+                <input id="weight-lbs" type="number" step="any" min="0">
               </div>
               <span class="field-helper">Body weight, kg or lbs</span>
             </div>
@@ -1895,12 +1895,12 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
           <div class="field-grid">
             <label>
               <span class="field-label">DBP</span>
-              <input id="dbp" type="number" step="0.01" required>
+              <input id="dbp" type="number" step="any" min="0" required>
               <span class="field-helper">Bottom number, mmHg</span>
             </label>
             <label>
               <span class="field-label">SBP</span>
-              <input id="sbp" type="number" step="0.01" required>
+              <input id="sbp" type="number" step="any" min="0" required>
               <span class="field-helper">Top number, mmHg</span>
             </label>
           </div>
@@ -1911,7 +1911,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
           <div class="field-grid">
             <label>
               <span class="field-label">Age</span>
-              <input id="age" type="number" step="0.01" required>
+              <input id="age" type="number" step="any" min="0" required>
               <span class="field-helper">Years</span>
             </label>
             <div class="field-control">
@@ -2337,6 +2337,29 @@ function requiredNumber(elementId, label = elementId) {
   return value;
 }
 
+function assertNonNegative(value, label) {
+  if (value < 0) throw new Error(`${label} must be non-negative.`);
+  return value;
+}
+
+function nonNegativeNumberOrNull(elementId, label = elementId) {
+  const value = numberOrNull(elementId, label);
+  return value === null ? null : assertNonNegative(value, label);
+}
+
+function requiredNonNegativeNumber(elementId, label = elementId) {
+  return assertNonNegative(requiredNumber(elementId, label), label);
+}
+
+function assertPositive(value, label) {
+  if (value <= 0) throw new Error(`${label} must be greater than 0.`);
+  return value;
+}
+
+function requiredPositiveNumber(elementId, label = elementId) {
+  return assertPositive(requiredNumber(elementId, label), label);
+}
+
 function formatProfileNumber(value, digits = 1) {
   return Number(value)
     .toFixed(digits)
@@ -2358,20 +2381,18 @@ function selectedHeightCentimeters() {
     const feet = Number(document.getElementById("height-ft").value);
     const inches = Number(document.getElementById("height-in").value);
     const totalInches = feet * 12 + inches;
-    if (!Number.isFinite(totalInches) || totalInches <= 0) throw new Error("Invalid numeric input for Height.");
+    if (!Number.isFinite(totalInches)) throw new Error("Invalid numeric input for Height.");
+    assertPositive(totalInches, "Height");
     return totalInches * 2.54;
   }
-  const heightCm = requiredNumber("height-cm", "Height");
-  if (heightCm <= 0) throw new Error("Invalid numeric input for Height.");
-  return heightCm;
+  return requiredPositiveNumber("height-cm", "Height");
 }
 
 function selectedWeightKilograms() {
   const weight = selectedRadioValue("weight-unit") === "lbs"
-    ? requiredNumber("weight-lbs", "Weight") / POUNDS_PER_KILOGRAM
-    : requiredNumber("weight-kg", "Weight");
-  if (weight <= 0) throw new Error("Invalid numeric input for Weight.");
-  return weight;
+    ? requiredPositiveNumber("weight-lbs", "Weight") / POUNDS_PER_KILOGRAM
+    : requiredPositiveNumber("weight-kg", "Weight");
+  return assertPositive(weight, "Weight");
 }
 
 function calculatedBMI() {
@@ -2447,12 +2468,14 @@ function imputeGlucoseScaled(bmi, dbp, sbp, age, sex) {
 }
 
 function buildState() {
-  const glucoseInput = numberOrNull("glucose");
+  const glucoseInput = nonNegativeNumberOrNull("glucose", "Glucose");
   const bmi = calculatedBMI();
-  const dbp = requiredNumber("dbp");
-  const sbp = requiredNumber("sbp");
-  const age = requiredNumber("age");
+  const dbp = requiredNonNegativeNumber("dbp", "DBP");
+  const sbp = requiredNonNegativeNumber("sbp", "SBP");
+  const age = requiredNonNegativeNumber("age", "Age");
   const sex = document.getElementById("sex").value;
+
+  if (dbp > sbp) throw new Error("DBP should not be greater than SBP.");
 
   let glucoseScaled;
   let glucoseRaw;
@@ -3719,13 +3742,19 @@ function setWeightUnit(unit) {
 function updateUnitPanels() {
   const heightIsImperial = selectedRadioValue("height-unit") === "ftin";
   const weightIsPounds = selectedRadioValue("weight-unit") === "lbs";
+  const heightCmInput = document.getElementById("height-cm");
+  const weightKgInput = document.getElementById("weight-kg");
+  const weightLbsInput = document.getElementById("weight-lbs");
   document.getElementById("height-cm-panel").hidden = heightIsImperial;
   document.getElementById("height-ftin-panel").hidden = !heightIsImperial;
-  document.getElementById("height-cm").required = !heightIsImperial;
+  heightCmInput.required = !heightIsImperial;
+  heightCmInput.disabled = heightIsImperial;
   document.getElementById("weight-kg-panel").hidden = weightIsPounds;
   document.getElementById("weight-lbs-panel").hidden = !weightIsPounds;
-  document.getElementById("weight-kg").required = !weightIsPounds;
-  document.getElementById("weight-lbs").required = weightIsPounds;
+  weightKgInput.required = !weightIsPounds;
+  weightKgInput.disabled = weightIsPounds;
+  weightLbsInput.required = weightIsPounds;
+  weightLbsInput.disabled = !weightIsPounds;
 }
 
 function syncHeightFieldsTo(unit) {
@@ -3760,6 +3789,49 @@ function syncWeightFieldsTo(unit) {
   }
 }
 
+function setNumericValidity(input, label, allowsZero = true) {
+  input.setCustomValidity("");
+  const raw = input.value.trim();
+  if (raw === "") return;
+  const value = Number(raw);
+  if (!Number.isFinite(value)) return;
+  if (value < 0) {
+    input.setCustomValidity(`${label} must be non-negative.`);
+  } else if (!allowsZero && value === 0) {
+    input.setCustomValidity(`${label} must be greater than 0.`);
+  }
+}
+
+function syncProfileInputValidity() {
+  [
+    ["glucose", "Glucose", true],
+    ["height-cm", "Height", false],
+    ["weight-kg", "Weight", false],
+    ["weight-lbs", "Weight", false],
+    ["dbp", "DBP", true],
+    ["sbp", "SBP", true],
+    ["age", "Age", true],
+  ].forEach(([id, label, allowsZero]) => {
+    const input = document.getElementById(id);
+    if (input) setNumericValidity(input, label, allowsZero);
+  });
+
+  const dbpInput = document.getElementById("dbp");
+  const sbpInput = document.getElementById("sbp");
+  const dbp = Number(dbpInput.value);
+  const sbp = Number(sbpInput.value);
+  if (
+    !dbpInput.validity.customError &&
+    Number.isFinite(dbp) &&
+    Number.isFinite(sbp) &&
+    dbp >= 0 &&
+    sbp >= 0 &&
+    dbp > sbp
+  ) {
+    dbpInput.setCustomValidity("DBP should not be greater than SBP.");
+  }
+}
+
 function resetExample() {
   const example = APP_DATA.exampleRaw;
   const heightCm = DEFAULT_HEIGHT_CM;
@@ -3778,6 +3850,7 @@ function resetExample() {
   document.getElementById("age").value = String(example.age);
   setSex(example.sex);
   updateUnitPanels();
+  syncProfileInputValidity();
   return updatePolicy();
 }
 
@@ -3981,8 +4054,16 @@ function endSheetDrag(event) {
   }
 }
 
-document.getElementById("policy-form").addEventListener("submit", (event) => {
+const policyForm = document.getElementById("policy-form");
+const generatePlanButton = policyForm.querySelector('button[type="submit"]');
+
+policyForm.addEventListener("input", syncProfileInputValidity);
+policyForm.addEventListener("change", syncProfileInputValidity);
+generatePlanButton.addEventListener("click", syncProfileInputValidity);
+
+policyForm.addEventListener("submit", (event) => {
   event.preventDefault();
+  syncProfileInputValidity();
   if (updatePolicy()) closeProfilePanel();
 });
 
