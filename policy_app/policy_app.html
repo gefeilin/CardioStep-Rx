@@ -390,6 +390,91 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       line-height: 1.35;
     }
 
+    .feedback-panel {
+      display: grid;
+      gap: 12px;
+    }
+
+    .feedback-body {
+      display: grid;
+      grid-template-columns: 34px minmax(0, 1fr);
+      gap: 12px;
+      align-items: start;
+    }
+
+    .feedback-cta {
+      display: inline-flex;
+      min-height: 46px;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
+      text-decoration: none;
+      box-shadow: 0 12px 22px rgba(6, 84, 96, 0.13);
+    }
+
+    .feedback-cta .sf-symbol {
+      width: 16px;
+      height: 16px;
+      stroke-width: 2.25;
+    }
+
+    .feedback-meta {
+      display: grid;
+      gap: 8px;
+    }
+
+    .feedback-meta-row {
+      display: grid;
+      grid-template-columns: 24px minmax(0, 1fr);
+      gap: 9px;
+      align-items: start;
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--bg);
+      color: inherit;
+      text-decoration: none;
+    }
+
+    .feedback-meta-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 999px;
+      background: rgba(10, 143, 143, 0.08);
+      color: var(--accent);
+    }
+
+    .feedback-meta-icon .sf-symbol {
+      width: 13px;
+      height: 13px;
+      stroke-width: 2.15;
+    }
+
+    .feedback-meta-row strong {
+      display: block;
+      color: var(--ink);
+      font-size: 12px;
+      line-height: 1.2;
+      font-weight: 800;
+    }
+
+    .feedback-meta-row span {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.35;
+      overflow-wrap: anywhere;
+    }
+
     .sheet-handle { display: none; }
 
     .mobile-profile-title,
@@ -1743,6 +1828,26 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     <path d="M16 9h2.5"></path>
     <path d="M16 12h2.5"></path>
   </symbol>
+  <symbol id="icon-people" viewBox="0 0 24 24">
+    <circle cx="9" cy="8" r="3.1"></circle>
+    <path d="M3.8 19a5.2 5.2 0 0 1 10.4 0"></path>
+    <circle cx="17" cy="9" r="2.5"></circle>
+    <path d="M15.2 18.5a4.2 4.2 0 0 1 5-3.8"></path>
+  </symbol>
+  <symbol id="icon-feedback" viewBox="0 0 24 24">
+    <path d="M5 6.2h10.8a2.4 2.4 0 0 1 2.4 2.4v5.1a2.4 2.4 0 0 1-2.4 2.4H10l-4.6 3v-3H5a2.4 2.4 0 0 1-2.4-2.4V8.6A2.4 2.4 0 0 1 5 6.2z"></path>
+    <path d="M8 10.1h5.7"></path>
+    <path d="M8 13h4.2"></path>
+    <path d="M17.8 5.4 20 3.2"></path>
+  </symbol>
+  <symbol id="icon-pencil" viewBox="0 0 24 24">
+    <path d="M4.5 19.5l4.2-.9L19 8.3a2 2 0 0 0-2.8-2.8L5.9 15.8l-.9 4.2z"></path>
+    <path d="M14.8 6.9l2.3 2.3"></path>
+  </symbol>
+  <symbol id="icon-envelope" viewBox="0 0 24 24">
+    <rect x="3.5" y="5.8" width="17" height="12.4" rx="2.2"></rect>
+    <path d="M5 8.2 12 13l7-4.8"></path>
+  </symbol>
   <symbol id="icon-nodes" viewBox="0 0 24 24">
     <circle cx="7" cy="7" r="2.4"></circle>
     <circle cx="17" cy="8" r="2.4"></circle>
@@ -2226,6 +2331,51 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
           <div class="action-kicker">Research model</div>
           <div class="action-headline">Offline reinforcement learning.</div>
           <div class="action-detail">The model learns functional actions that represent a 90-day distribution of daily steps.</div>
+        </div>
+      </section>
+
+      <section class="feedback-panel card" aria-label="Feedback and contact" data-tab-panel="insight">
+        <div class="feedback-body">
+          <span class="action-icon" aria-hidden="true">
+            <svg class="sf-symbol"><use href="#icon-feedback"></use></svg>
+          </span>
+          <div>
+            <div class="action-kicker">Feedback</div>
+            <div class="action-headline">Help improve CardioStepRx.</div>
+            <div class="action-detail">Tell us what was confusing, useful, or missing. Your comments help improve the research prototype.</div>
+          </div>
+        </div>
+
+        <a
+          class="feedback-cta"
+          id="feedback-form-link"
+          href="https://forms.gle/fMpVgWgoDKoRNXG76"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <svg class="sf-symbol" aria-hidden="true"><use href="#icon-pencil"></use></svg>
+          <span>Give feedback</span>
+        </a>
+
+        <div class="feedback-meta">
+          <div class="feedback-meta-row">
+            <span class="feedback-meta-icon" aria-hidden="true">
+              <svg class="sf-symbol"><use href="#icon-people"></use></svg>
+            </span>
+            <div>
+              <strong>Maintainers</strong>
+              <span>Gefei Lin and Xiaoke Zhang</span>
+            </div>
+          </div>
+          <a class="feedback-meta-row" id="contact-email-link" href="mailto:cardiosteprx@gmail.com">
+            <span class="feedback-meta-icon" aria-hidden="true">
+              <svg class="sf-symbol"><use href="#icon-envelope"></use></svg>
+            </span>
+            <div>
+              <strong>Contact</strong>
+              <span>cardiosteprx@gmail.com</span>
+            </div>
+          </a>
         </div>
       </section>
 
@@ -4243,6 +4393,14 @@ document.getElementById("insight-toggle").addEventListener("click", () => {
   if (expanded) {
     analyticsCapture("expand_insight", {source: "insight_panel"});
   }
+});
+
+document.getElementById("feedback-form-link").addEventListener("click", () => {
+  analyticsCapture("open_feedback_form", {source: "about_card"});
+});
+
+document.getElementById("contact-email-link").addEventListener("click", () => {
+  analyticsCapture("open_contact_email", {source: "about_card"});
 });
 
 document.addEventListener("click", (event) => {

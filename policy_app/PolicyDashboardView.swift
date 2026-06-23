@@ -188,6 +188,7 @@ struct PolicyDashboardView: View {
             case .insight:
                 WhyThisPlanAboutCard(result: result)
                 ResearchModelCard()
+                FeedbackContactCard()
                 InsightPanel(result: result, isExpanded: $isInsightExpanded)
                 SubgroupPanel(result: result)
                 SafetyDisclaimerView()
@@ -248,6 +249,7 @@ struct PolicyDashboardView: View {
             )
             WhyThisPlanAboutCard(result: result)
             ResearchModelCard()
+            FeedbackContactCard()
             InsightPanel(result: result, isExpanded: $isInsightExpanded)
             SubgroupPanel(result: result)
             SafetyDisclaimerView()
@@ -1268,6 +1270,105 @@ private struct ResearchModelCard: View {
             headline: "Offline reinforcement learning.",
             detail: "The model learns functional actions that represent a 90-day distribution of daily steps."
         )
+    }
+}
+
+private struct FeedbackContactCard: View {
+    @Environment(\.openURL) private var openURL
+
+    private let feedbackURL = URL(string: "https://forms.gle/fMpVgWgoDKoRNXG76")!
+    private let contactURL = URL(string: "mailto:cardiosteprx@gmail.com")!
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            HStack(alignment: .top, spacing: 12) {
+                Image(systemName: "bubble.left.and.text.bubble.right")
+                    .font(.headline.weight(.semibold))
+                    .foregroundStyle(AppTheme.green)
+                    .frame(width: 34, height: 34)
+                    .background(AppTheme.green.opacity(0.10))
+                    .clipShape(Circle())
+
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Feedback")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.secondary)
+                    Text("Help improve CardioStepRx.")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(AppTheme.ink)
+                    Text("Tell us what was confusing, useful, or missing. Your comments help improve the research prototype.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+            }
+
+            Button {
+                AnalyticsClient.shared.track("open_feedback_form", properties: ["source": "about_card"])
+                openURL(feedbackURL)
+            } label: {
+                Label("Give feedback", systemImage: "square.and.pencil")
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(.borderedProminent)
+            .tint(AppTheme.green)
+            .accessibilityHint("Opens a Google Form in your browser")
+
+            VStack(spacing: 8) {
+                FeedbackInfoRow(
+                    icon: "person.2",
+                    title: "Maintainers",
+                    detail: "Gefei Lin and Xiaoke Zhang"
+                )
+                Button {
+                    AnalyticsClient.shared.track("open_contact_email", properties: ["source": "about_card"])
+                    openURL(contactURL)
+                } label: {
+                    FeedbackInfoRow(
+                        icon: "envelope",
+                        title: "Contact",
+                        detail: "cardiosteprx@gmail.com"
+                    )
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens an email draft")
+            }
+        }
+        .cardStyle()
+        .accessibilityIdentifier("feedbackContactCard")
+    }
+}
+
+private struct FeedbackInfoRow: View {
+    let icon: String
+    let title: String
+    let detail: String
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 9) {
+            Image(systemName: icon)
+                .font(.caption.weight(.bold))
+                .foregroundStyle(AppTheme.green)
+                .frame(width: 24, height: 24)
+                .background(AppTheme.green.opacity(0.08))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(title)
+                    .font(.caption.weight(.bold))
+                    .foregroundStyle(AppTheme.ink)
+                Text(detail)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.leading)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .padding(10)
+        .background(AppTheme.background)
+        .clipShape(RoundedRectangle(cornerRadius: 8, style: .continuous))
     }
 }
 
