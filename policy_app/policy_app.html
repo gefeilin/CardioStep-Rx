@@ -189,7 +189,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     }
 
     main {
-      width: min(1180px, 100%);
+      width: min(760px, 100%);
       margin: 0 auto;
       padding: max(18px, env(safe-area-inset-top)) 16px calc(28px + env(safe-area-inset-bottom));
     }
@@ -244,10 +244,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     }
 
     .layout {
-      display: grid;
-      grid-template-columns: minmax(300px, 360px) minmax(0, 1fr);
-      gap: 16px;
-      align-items: start;
+      display: block;
     }
 
     .results-section {
@@ -266,8 +263,8 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     }
 
     .profile-panel {
-      position: sticky;
-      top: 16px;
+      position: relative;
+      top: auto;
     }
 
     .section-heading,
@@ -1526,10 +1523,25 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
     .sheet-backdrop { display: none; }
 
     .mobile-tab-bar {
-      display: none;
+      position: sticky;
+      top: max(10px, env(safe-area-inset-top));
+      z-index: 16;
+      display: grid;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 6px;
+      margin: 0 0 12px;
+      padding: 7px;
+      border: 1px solid rgba(148, 163, 184, 0.24);
+      border-radius: 18px;
+      background: rgba(255, 255, 255, 0.86);
+      box-shadow: 0 12px 30px rgba(7, 31, 51, 0.08);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
 
-    .mobile-tabs-active [data-tab-panel][hidden] {
+    .results-section[hidden],
+    .profile-panel[hidden],
+    [data-tab-panel][hidden] {
       display: none !important;
     }
 
@@ -1539,7 +1551,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       border-radius: 12px;
       background: transparent;
       color: #778392;
-      padding: 7px 4px 6px;
+      padding: 8px 4px 7px;
       font-size: 11px;
       font-weight: 700;
       line-height: 1.1;
@@ -1733,6 +1745,7 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
 
       .mobile-tab-bar {
         position: fixed;
+        top: auto;
         left: 0;
         right: 0;
         bottom: 0;
@@ -1740,8 +1753,13 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
         display: grid;
         grid-template-columns: repeat(5, minmax(0, 1fr));
         gap: 4px;
+        margin: 0;
         padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
         border-top: 1px solid rgba(148, 163, 184, 0.26);
+        border-right: 0;
+        border-bottom: 0;
+        border-left: 0;
+        border-radius: 0;
         background: rgba(255, 255, 255, 0.92);
         box-shadow: 0 -12px 30px rgba(7, 31, 51, 0.08);
         backdrop-filter: blur(18px);
@@ -1929,6 +1947,29 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
       <p class="subhead">Personalized daily-step guidance to reduce cardiometabolic risk</p>
     </div>
 	  </header>
+
+  <nav class="mobile-tab-bar" id="mobile-tab-bar" aria-label="App sections">
+    <button class="mobile-tab active" type="button" data-mobile-tab="plan" aria-current="page">
+      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-target"></use></svg>
+      <span>Plan</span>
+    </button>
+    <button class="mobile-tab" type="button" data-mobile-tab="chart">
+      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-chart-axis"></use></svg>
+      <span>Chart</span>
+    </button>
+    <button class="mobile-tab" type="button" data-mobile-tab="track">
+      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-calendar"></use></svg>
+      <span>Track</span>
+    </button>
+    <button class="mobile-tab" type="button" data-mobile-tab="insight">
+      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-info"></use></svg>
+      <span>About</span>
+    </button>
+    <button class="mobile-tab" type="button" data-mobile-tab="profile">
+      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-sliders"></use></svg>
+      <span>Profile</span>
+    </button>
+  </nav>
 
   <div class="layout">
     <section class="profile-panel" id="profile-panel" aria-label="Profile inputs">
@@ -2438,29 +2479,6 @@ e.exports=function(t){return null!=t&&(n(t)||function(t){return"function"==typeo
   </div>
 
   <div id="profile-backdrop" class="sheet-backdrop" hidden></div>
-
-  <nav class="mobile-tab-bar" id="mobile-tab-bar" aria-label="Mobile sections">
-    <button class="mobile-tab active" type="button" data-mobile-tab="plan" aria-current="page">
-      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-target"></use></svg>
-      <span>Plan</span>
-    </button>
-    <button class="mobile-tab" type="button" data-mobile-tab="chart">
-      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-chart-axis"></use></svg>
-      <span>Chart</span>
-    </button>
-    <button class="mobile-tab" type="button" data-mobile-tab="track">
-      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-calendar"></use></svg>
-      <span>Track</span>
-    </button>
-    <button class="mobile-tab" type="button" data-mobile-tab="insight">
-      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-info"></use></svg>
-      <span>About</span>
-    </button>
-    <button class="mobile-tab" type="button" data-mobile-tab="profile">
-      <svg class="sf-symbol" aria-hidden="true"><use href="#icon-sliders"></use></svg>
-      <span>Profile</span>
-    </button>
-  </nav>
 </main>
 
 <script>
@@ -4069,6 +4087,7 @@ function resetExample() {
 
 const profilePanel = document.getElementById("profile-panel");
 const profileBackdrop = document.getElementById("profile-backdrop");
+const resultsSection = document.querySelector(".results-section");
 const mobileViewportQuery = window.matchMedia("(max-width: 819px), (hover: none) and (pointer: coarse)");
 const mobileTabButtons = document.querySelectorAll("[data-mobile-tab]");
 const mobileTabPanels = document.querySelectorAll("[data-tab-panel]");
@@ -4076,9 +4095,11 @@ let activeMobileTab = "plan";
 let lastContentTab = "plan";
 const initialMobileTab = new URLSearchParams(window.location.search).get("tab");
 const shouldOpenInitialProfile = initialMobileTab === "profile";
-if (["plan", "track", "chart", "insight"].includes(initialMobileTab)) {
+if (["plan", "track", "chart", "insight", "profile"].includes(initialMobileTab)) {
   activeMobileTab = initialMobileTab;
-  lastContentTab = initialMobileTab;
+  if (initialMobileTab !== "profile") {
+    lastContentTab = initialMobileTab;
+  }
 }
 const sheetDragState = {
   active: false,
@@ -4105,6 +4126,7 @@ function clearSheetOffset() {
 
 function openProfilePanel() {
   analyticsCapture("open_profile", {source: isMobileSheetMode() ? "mobile_sheet" : "desktop"});
+  profilePanel.hidden = false;
   document.body.classList.add("profile-open");
   profilePanel.classList.add("is-open");
   clearSheetOffset();
@@ -4132,7 +4154,32 @@ function closeProfilePanel() {
 }
 
 function syncProfilePanelVisibility() {
-  if (isMobileSheetMode() && !profilePanel.classList.contains("is-open")) {
+  const isMobile = isMobileSheetMode();
+  if (!isMobile) {
+    document.body.classList.remove("profile-open");
+    profilePanel.classList.remove("is-open", "is-dragging");
+    clearSheetOffset();
+    profileBackdrop.hidden = true;
+    const isProfileActive = activeMobileTab === "profile";
+    profilePanel.hidden = !isProfileActive;
+    if (isProfileActive) {
+      profilePanel.removeAttribute("aria-hidden");
+      profilePanel.inert = false;
+    } else {
+      profilePanel.setAttribute("aria-hidden", "true");
+      profilePanel.inert = true;
+    }
+    return;
+  }
+
+  profilePanel.hidden = false;
+  if (activeMobileTab === "profile") {
+    document.body.classList.add("profile-open");
+    profilePanel.classList.add("is-open");
+    profilePanel.removeAttribute("aria-hidden");
+    profilePanel.inert = false;
+    profileBackdrop.hidden = false;
+  } else if (!profilePanel.classList.contains("is-open")) {
     profilePanel.setAttribute("aria-hidden", "true");
     profilePanel.inert = true;
   } else {
@@ -4156,19 +4203,22 @@ function setMobileTabButtonState(tabName) {
 function syncMobileTabPanels() {
   const isMobile = isMobileSheetMode();
   document.body.classList.toggle("mobile-tabs-active", isMobile);
+  const contentTab = activeMobileTab === "profile" ? lastContentTab : activeMobileTab;
 
   mobileTabPanels.forEach((panel) => {
-    if (!isMobile) {
-      panel.hidden = false;
-      return;
-    }
     const panelTabs = (panel.dataset.tabPanel || "").split(/\s+/);
-    panel.hidden = !panelTabs.includes(activeMobileTab);
+    panel.hidden = !panelTabs.includes(contentTab);
   });
 
-  setMobileTabButtonState(isMobile ? activeMobileTab : "plan");
+  if (resultsSection) {
+    resultsSection.hidden = !isMobile && activeMobileTab === "profile";
+  }
+  profilePanel.hidden = isMobile ? false : activeMobileTab !== "profile";
+  syncProfilePanelVisibility();
 
-  if (isMobile && activeMobileTab === "chart") {
+  setMobileTabButtonState(activeMobileTab);
+
+  if (contentTab === "chart" && activeMobileTab !== "profile") {
     setTimeout(renderChart, 0);
   }
 }
@@ -4177,7 +4227,15 @@ function selectMobileTab(tabName) {
   if (tabName === "profile") {
     activeMobileTab = "profile";
     setMobileTabButtonState("profile");
-    openProfilePanel();
+    if (isMobileSheetMode()) {
+      openProfilePanel();
+    } else {
+      analyticsCapture("open_profile", {source: "desktop_tab"});
+      syncMobileTabPanels();
+      if (window.scrollTo) {
+        window.scrollTo({top: 0, behavior: "smooth"});
+      }
+    }
     return;
   }
 
@@ -4189,7 +4247,7 @@ function selectMobileTab(tabName) {
   syncMobileTabPanels();
   const eventName = analyticsEventForTab(tabName);
   if (eventName) {
-    analyticsCapture(eventName, {view: tabName, source: "mobile_tab"});
+    analyticsCapture(eventName, {view: tabName, source: isMobileSheetMode() ? "mobile_tab" : "desktop_tab"});
   }
   if (window.scrollTo) {
     window.scrollTo({top: 0, behavior: "smooth"});
@@ -4447,7 +4505,7 @@ populateProfileSelectors();
 syncProfilePanelVisibility();
 resetExample();
 syncMobileTabPanels();
-if (shouldOpenInitialProfile && isMobileSheetMode()) {
+if (shouldOpenInitialProfile) {
   selectMobileTab("profile");
 }
 scrollToPageTop();
