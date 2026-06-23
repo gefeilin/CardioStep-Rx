@@ -186,9 +186,9 @@ struct PolicyDashboardView: View {
             case .track:
                 HealthTrackerPanel(engine: engine, result: result, tracker: stepTracker)
             case .insight:
+                FeedbackContactCard()
                 WhyThisPlanAboutCard(result: result)
                 ResearchModelCard()
-                FeedbackContactCard()
                 InsightPanel(result: result, isExpanded: $isInsightExpanded)
                 SubgroupPanel(result: result)
                 SafetyDisclaimerView()
@@ -247,9 +247,9 @@ struct PolicyDashboardView: View {
                 selectedDensityStep: $selectedDensityStep,
                 selectedQuantileLevel: $selectedQuantileLevel
             )
+            FeedbackContactCard()
             WhyThisPlanAboutCard(result: result)
             ResearchModelCard()
-            FeedbackContactCard()
             InsightPanel(result: result, isExpanded: $isInsightExpanded)
             SubgroupPanel(result: result)
             SafetyDisclaimerView()
