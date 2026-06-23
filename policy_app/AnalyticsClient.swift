@@ -39,7 +39,7 @@ final class AnalyticsClient {
             return
         }
 
-        var request = URLRequest(url: URL(string: "/capture/", relativeTo: host)!.absoluteURL)
+        var request = URLRequest(url: URL(string: "/i/v0/e/", relativeTo: host)!.absoluteURL)
         request.httpMethod = "POST"
         request.timeoutInterval = 5
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

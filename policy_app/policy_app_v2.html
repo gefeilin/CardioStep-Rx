@@ -2364,7 +2364,7 @@ function analyticsCapture(eventName, properties = {}) {
     },
   };
   const host = ANALYTICS_CONFIG.host.replace(/\/+$/, "");
-  window.fetch(`${host}/capture/`, {
+  window.fetch(`${host}/i/v0/e/`, {
     method: "POST",
     headers: {"Content-Type": "application/json"},
     body: JSON.stringify(payload),
