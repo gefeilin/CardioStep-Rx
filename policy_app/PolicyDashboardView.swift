@@ -17,6 +17,36 @@ private enum MobileDashboardTab: String, CaseIterable, Identifiable {
 
     var id: String { rawValue }
 
+    var analyticsViewName: String {
+        switch self {
+        case .plan:
+            return "plan"
+        case .chart:
+            return "chart"
+        case .track:
+            return "track"
+        case .insight:
+            return "about"
+        case .profile:
+            return "profile"
+        }
+    }
+
+    var analyticsEventName: String? {
+        switch self {
+        case .plan:
+            return "view_plan"
+        case .chart:
+            return "view_chart"
+        case .track:
+            return "view_track"
+        case .insight:
+            return "view_insight"
+        case .profile:
+            return nil
+        }
+    }
+
     var systemImage: String {
         switch self {
         case .plan:
@@ -47,6 +77,7 @@ struct PolicyDashboardView: View {
     @StateObject private var stepTracker = HealthStepTracker()
     @State private var activeMobileTab: MobileDashboardTab = .plan
     @State private var lastContentMobileTab: MobileDashboardTab = .plan
+    @State private var didTrackInitialView = false
 
     init(engine: PolicyEngine) {
         self.engine = engine
@@ -109,6 +140,17 @@ struct PolicyDashboardView: View {
                 .presentationDetents([.height(680), .large], selection: $profileEditorDetent)
                 .presentationDragIndicator(.visible)
             }
+            .onAppear {
+                guard !didTrackInitialView else { return }
+                didTrackInitialView = true
+                AnalyticsClient.shared.track(
+                    "view_plan",
+                    properties: [
+                        "view": "plan",
+                        "source": "initial"
+                    ]
+                )
+            }
         }
     }
 
@@ -157,20 +199,30 @@ struct PolicyDashboardView: View {
 
     private func selectMobileTab(_ tab: MobileDashboardTab) {
         if tab == .profile {
-            openProfileEditor()
+            openProfileEditor(source: "mobile_tab")
             return
         }
 
         activeMobileTab = tab
         lastContentMobileTab = tab
+        if let eventName = tab.analyticsEventName {
+            AnalyticsClient.shared.track(
+                eventName,
+                properties: [
+                    "view": tab.analyticsViewName,
+                    "source": "mobile_tab"
+                ]
+            )
+        }
         if isShowingProfileEditor {
             isShowingProfileEditor = false
         }
     }
 
-    private func openProfileEditor() {
+    private func openProfileEditor(source: String = "dashboard") {
         profileEditorDetent = .height(680)
         isShowingProfileEditor = true
+        AnalyticsClient.shared.track("open_profile", properties: ["source": source])
     }
 
     private func handleProfileDismiss() {
@@ -555,7 +607,7 @@ private struct ProfileEditorPanel: View {
                 .accessibilityIdentifier("resetExampleButton")
 
                 Button {
-                    generate()
+                    generate(source: "profile_editor")
                 } label: {
                     Label("Generate Plan", systemImage: "waveform.path.ecg")
                         .frame(maxWidth: .infinity)
@@ -574,10 +626,11 @@ private struct ProfileEditorPanel: View {
         }
     }
 
-    private func generate() {
+    private func generate(source: String) {
         do {
             result = try engine.evaluate(profile: form.validatedProfile())
             errorMessage = nil
+            AnalyticsClient.shared.track("generate_plan", properties: ["source": source])
             if dismissAfterGenerate {
                 dismiss()
             }
@@ -588,7 +641,8 @@ private struct ProfileEditorPanel: View {
 
     private func reset() {
         form = ProfileFormState(example: engine.data.exampleRaw)
-        generate()
+        AnalyticsClient.shared.track("reset_profile", properties: ["source": "profile_editor"])
+        generate(source: "reset_example")
     }
 }
 
@@ -1424,6 +1478,10 @@ private struct HealthTrackerPanel: View {
 
                 HStack(alignment: .center, spacing: 10) {
                     Button {
+                        AnalyticsClient.shared.track(
+                            tracker.hasRequestedHealthAccess ? "refresh_health" : "connect_health",
+                            properties: ["source": "health_tracker"]
+                        )
                         Task {
                             await tracker.connectAndLoad()
                         }
@@ -1752,6 +1810,15 @@ private struct ChartPanel: View {
             }
             .pickerStyle(.segmented)
             .accessibilityIdentifier("chartModePicker")
+            .onChange(of: mode) { _, newMode in
+                AnalyticsClient.shared.track(
+                    newMode == .density ? "switch_density_chart" : "switch_quantile_chart",
+                    properties: [
+                        "mode": newMode == .density ? "density" : "quantile",
+                        "source": "chart_panel"
+                    ]
+                )
+            }
 
             ChartLegendRow(
                 primaryColor: mode == .density ? AppTheme.green : AppTheme.purple,
@@ -2283,7 +2350,11 @@ private struct InsightPanel: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Button {
-                isExpanded.toggle()
+                let nextState = !isExpanded
+                isExpanded = nextState
+                if nextState {
+                    AnalyticsClient.shared.track("expand_insight", properties: ["source": "insight_panel"])
+                }
             } label: {
                 HStack {
                     VStack(alignment: .leading, spacing: 4) {

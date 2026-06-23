@@ -2318,6 +2318,69 @@ const APP_DATA = {"checkpointName":"Fitted_Q_lambda_spline_v8_with_PM_v7_exagese
 
 const DEFAULT_HEIGHT_CM = 170;
 const POUNDS_PER_KILOGRAM = 2.2046226218;
+const ANALYTICS_CONFIG = {
+  token: "phc_BAP6Za8fxuvrqTpVSgQTnuQwknAo3mZRYujs7c4F7Xxn",
+  host: "https://us.i.posthog.com",
+  appName: "CardioStepRx",
+  appVersion: "web-2026-06-23",
+  platform: "web",
+};
+const ANALYTICS_DISTINCT_ID_KEY = "cardiosteprx_analytics_distinct_id";
+const ANALYTICS_SESSION_ID = analyticsRandomID("web-session");
+
+function analyticsRandomID(prefix) {
+  if (window.crypto?.randomUUID) return `${prefix}-${window.crypto.randomUUID()}`;
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2)}`;
+}
+
+function analyticsDistinctID() {
+  try {
+    const existing = window.localStorage.getItem(ANALYTICS_DISTINCT_ID_KEY);
+    if (existing) return existing;
+    const generated = analyticsRandomID("web");
+    window.localStorage.setItem(ANALYTICS_DISTINCT_ID_KEY, generated);
+    return generated;
+  } catch {
+    if (!window.__cardioStepAnalyticsID) {
+      window.__cardioStepAnalyticsID = analyticsRandomID("web-memory");
+    }
+    return window.__cardioStepAnalyticsID;
+  }
+}
+
+function analyticsCapture(eventName, properties = {}) {
+  if (!ANALYTICS_CONFIG.token || !window.fetch) return;
+  const payload = {
+    api_key: ANALYTICS_CONFIG.token,
+    event: eventName,
+    distinct_id: analyticsDistinctID(),
+    properties: {
+      "$process_person_profile": false,
+      app_name: ANALYTICS_CONFIG.appName,
+      app_version: ANALYTICS_CONFIG.appVersion,
+      platform: ANALYTICS_CONFIG.platform,
+      session_id: ANALYTICS_SESSION_ID,
+      ...properties,
+    },
+  };
+  const host = ANALYTICS_CONFIG.host.replace(/\/+$/, "");
+  window.fetch(`${host}/capture/`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(payload),
+    keepalive: true,
+    mode: "cors",
+  }).catch(() => {});
+}
+
+function analyticsEventForTab(tabName) {
+  return {
+    plan: "view_plan",
+    track: "view_track",
+    chart: "view_chart",
+    insight: "view_insight",
+  }[tabName];
+}
 
 function numberOrNull(elementId, label = elementId) {
   const raw = document.getElementById(elementId).value.trim();
@@ -3891,6 +3954,7 @@ function clearSheetOffset() {
 }
 
 function openProfilePanel() {
+  analyticsCapture("open_profile", {source: isMobileSheetMode() ? "mobile_sheet" : "desktop"});
   document.body.classList.add("profile-open");
   profilePanel.classList.add("is-open");
   clearSheetOffset();
@@ -3973,6 +4037,10 @@ function selectMobileTab(tabName) {
     closeProfilePanel();
   }
   syncMobileTabPanels();
+  const eventName = analyticsEventForTab(tabName);
+  if (eventName) {
+    analyticsCapture(eventName, {view: tabName, source: "mobile_tab"});
+  }
   if (window.scrollTo) {
     window.scrollTo({top: 0, behavior: "smooth"});
   }
@@ -4064,11 +4132,18 @@ generatePlanButton.addEventListener("click", syncProfileInputValidity);
 policyForm.addEventListener("submit", (event) => {
   event.preventDefault();
   syncProfileInputValidity();
-  if (updatePolicy()) closeProfilePanel();
+  if (updatePolicy()) {
+    analyticsCapture("generate_plan", {source: "profile_form"});
+    closeProfilePanel();
+  }
 });
 
 document.getElementById("reset").addEventListener("click", () => {
-  if (resetExample()) closeProfilePanel();
+  if (resetExample()) {
+    analyticsCapture("reset_profile", {source: "profile_form"});
+    analyticsCapture("generate_plan", {source: "reset_example"});
+    closeProfilePanel();
+  }
 });
 
 document.getElementById("manual-track-form").addEventListener("submit", (event) => {
@@ -4087,6 +4162,7 @@ document.getElementById("manual-track-form").addEventListener("submit", (event) 
   document.getElementById("track-entry-date").value = entryDateKey;
   saveTrackState(state);
   updateTrackPanel(currentViewModel);
+  analyticsCapture("add_manual_step_entry", {source: "manual_tracker"});
 });
 
 document.getElementById("cycle-start-date").addEventListener("change", () => {
@@ -4114,6 +4190,7 @@ document.getElementById("clear-track-data").addEventListener("click", () => {
   const state = {cycleStart: clampDateKeyToToday(document.getElementById("cycle-start-date").value), entries: {}};
   saveTrackState(state);
   updateTrackPanel(currentViewModel);
+  analyticsCapture("clear_manual_tracker", {source: "manual_tracker"});
 });
 
 document.querySelectorAll("input[name='sex-choice']").forEach((input) => {
@@ -4150,6 +4227,10 @@ document.querySelectorAll("[data-chart-mode]").forEach((button) => {
   button.addEventListener("click", () => {
     chartMode = button.dataset.chartMode;
     renderChart();
+    analyticsCapture(chartMode === "density" ? "switch_density_chart" : "switch_quantile_chart", {
+      mode: chartMode,
+      source: "chart_panel",
+    });
   });
 });
 
@@ -4159,6 +4240,9 @@ document.getElementById("insight-toggle").addEventListener("click", () => {
   detail.hidden = !expanded;
   document.getElementById("insight-toggle").setAttribute("aria-expanded", expanded ? "true" : "false");
   document.getElementById("insight-chevron").innerHTML = iconUse(expanded ? "chevron-up" : "chevron-down");
+  if (expanded) {
+    analyticsCapture("expand_insight", {source: "insight_panel"});
+  }
 });
 
 document.addEventListener("click", (event) => {
@@ -4210,6 +4294,11 @@ if (shouldOpenInitialProfile && isMobileSheetMode()) {
 }
 scrollToPageTop();
 hideLaunchScreen();
+analyticsCapture("app_open");
+analyticsCapture(analyticsEventForTab(activeMobileTab) || "view_plan", {
+  view: activeMobileTab,
+  source: "initial",
+});
 </script>
 </body>
 </html>

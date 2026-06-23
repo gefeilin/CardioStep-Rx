@@ -60,6 +60,7 @@ struct ContentView: View {
         withAnimation(.easeInOut(duration: 0.45)) {
             isShowingLaunch = false
         }
+        AnalyticsClient.shared.track("app_open")
     }
 }
 
