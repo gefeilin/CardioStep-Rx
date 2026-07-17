@@ -1346,17 +1346,6 @@ private struct CitationCard: View {
     @Environment(\.openURL) private var openURL
 
     private let paperURL = URL(string: "https://arxiv.org/abs/2605.19208")!
-    private static let bibTeX = """
-    @misc{lin2026precisionphysicalactivityprescription,
-      title={Precision Physical Activity Prescription via Reinforcement Learning for Functional Actions},
-      author={Gefei Lin and Rui Miao and Jennifer Sacheck and Xiaoke Zhang},
-      year={2026},
-      eprint={2605.19208},
-      archivePrefix={arXiv},
-      primaryClass={stat.AP},
-      url={https://arxiv.org/abs/2605.19208},
-    }
-    """
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
@@ -1392,20 +1381,6 @@ private struct CitationCard: View {
                 }
                 .buttonStyle(.plain)
                 .accessibilityHint("Opens the arXiv paper in your browser")
-
-                DisclosureGroup {
-                    ScrollView(.horizontal, showsIndicators: false) {
-                        Text(Self.bibTeX)
-                            .font(.caption.monospaced())
-                            .foregroundStyle(.secondary)
-                            .textSelection(.enabled)
-                            .padding(.top, 6)
-                    }
-                } label: {
-                    Text("BibTeX")
-                        .font(.subheadline.weight(.bold))
-                        .foregroundStyle(AppTheme.ink)
-                }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
         }
