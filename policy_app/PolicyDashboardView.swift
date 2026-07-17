@@ -187,6 +187,7 @@ struct PolicyDashboardView: View {
                 HealthTrackerPanel(engine: engine, result: result, tracker: stepTracker)
             case .insight:
                 FeedbackContactCard()
+                CitationCard()
                 WhyThisPlanAboutCard(result: result)
                 ResearchModelCard()
                 InsightPanel(result: result, isExpanded: $isInsightExpanded)
@@ -248,6 +249,7 @@ struct PolicyDashboardView: View {
                 selectedQuantileLevel: $selectedQuantileLevel
             )
             FeedbackContactCard()
+            CitationCard()
             WhyThisPlanAboutCard(result: result)
             ResearchModelCard()
             InsightPanel(result: result, isExpanded: $isInsightExpanded)
@@ -1337,6 +1339,78 @@ private struct FeedbackContactCard: View {
         }
         .cardStyle()
         .accessibilityIdentifier("feedbackContactCard")
+    }
+}
+
+private struct CitationCard: View {
+    @Environment(\.openURL) private var openURL
+
+    private let paperURL = URL(string: "https://arxiv.org/abs/2605.19208")!
+    private static let bibTeX = """
+    @misc{lin2026precisionphysicalactivityprescription,
+      title={Precision Physical Activity Prescription via Reinforcement Learning for Functional Actions},
+      author={Gefei Lin and Rui Miao and Jennifer Sacheck and Xiaoke Zhang},
+      year={2026},
+      eprint={2605.19208},
+      archivePrefix={arXiv},
+      primaryClass={stat.AP},
+      url={https://arxiv.org/abs/2605.19208},
+    }
+    """
+
+    var body: some View {
+        HStack(alignment: .top, spacing: 12) {
+            Image(systemName: "doc.text.magnifyingglass")
+                .font(.headline.weight(.semibold))
+                .foregroundStyle(AppTheme.green)
+                .frame(width: 34, height: 34)
+                .background(AppTheme.green.opacity(0.10))
+                .clipShape(Circle())
+
+            VStack(alignment: .leading, spacing: 10) {
+                VStack(alignment: .leading, spacing: 5) {
+                    Text("Citation")
+                        .font(.caption.weight(.bold))
+                        .foregroundStyle(.secondary)
+                    Text("Precision Physical Activity Prescription via Reinforcement Learning for Functional Actions.")
+                        .font(.headline.weight(.bold))
+                        .foregroundStyle(AppTheme.ink)
+                        .fixedSize(horizontal: false, vertical: true)
+                    Text("Gefei Lin, Rui Miao, Jennifer Sacheck, and Xiaoke Zhang. arXiv:2605.19208, 2026.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+
+                Button {
+                    AnalyticsClient.shared.track("open_citation_paper", properties: ["source": "about_card"])
+                    openURL(paperURL)
+                } label: {
+                    Label("View paper on arXiv", systemImage: "arrow.up.forward.square")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(AppTheme.green)
+                }
+                .buttonStyle(.plain)
+                .accessibilityHint("Opens the arXiv paper in your browser")
+
+                DisclosureGroup {
+                    ScrollView(.horizontal, showsIndicators: false) {
+                        Text(Self.bibTeX)
+                            .font(.caption.monospaced())
+                            .foregroundStyle(.secondary)
+                            .textSelection(.enabled)
+                            .padding(.top, 6)
+                    }
+                } label: {
+                    Text("BibTeX")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(AppTheme.ink)
+                }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+        }
+        .cardStyle()
+        .accessibilityIdentifier("citationCard")
     }
 }
 
